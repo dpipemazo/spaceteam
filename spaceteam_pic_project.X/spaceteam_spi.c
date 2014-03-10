@@ -25,9 +25,9 @@
  }
 
  // This function can be used to write a byte to the SPI bus
-unsigned short spi_write(unsigned short data)
+unsigned char spi_write(unsigned char data)
  {
-    unsigned short ret_val;
+    unsigned char ret_val;
 
     // Do a dummy read to clear the BF flag
     //  if it's set
@@ -49,6 +49,28 @@ unsigned short spi_write(unsigned short data)
  int is_spi_initialized(void)
  {
     return init_done;
+ }
+
+ // This function performs SPI writes on a bufffer of input data and
+ // reads the results to a buffer of output data, unless the output data
+ // pointer is NULL
+ void spi_write_multiple(unsigned char * datain, unsigned char * dataout, unsigned int length)
+ {
+    int i;
+    unsigned char temp_val;
+
+    // Do a SPI write for all of the data in the buffer
+    for( i = 0; i < length; i++)
+    {
+        // Do the SPI write
+        temp_val = spi_write(datain[i]);
+        // And write the return value to the output buffer if
+        //  the pointer is non-NULL
+        if (dataout != NULL)
+        {
+            dataout[i] = temp_val;
+        }
+    }
  }
 
 

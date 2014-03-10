@@ -14,8 +14,9 @@ extern "C" {
 
 // Function declarations
 void init_spi(void);
-unsigned spi_write(unsigned short data);
+unsigned spi_write(unsigned char data);
 int is_spi_initialized(void);
+void spi_write_multiple(unsigned char * datain, unsigned char * dataout, unsigned int length);
 
 #ifdef	__cplusplus
 }

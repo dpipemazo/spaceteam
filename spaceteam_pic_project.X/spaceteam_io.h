@@ -17,12 +17,12 @@ extern "C" {
 //
 
 // PORT A 
-#define IOIN_INPUT 		0b00010000
+#define IOIN_INPUT 			0b00010000 	// IOin is RA4
+#define WIRELESS_IRQ_INPUT	0b01000000	// IRQ is RA6
 
 // PORT B
 #define SPI_MISO_INPUT			0b0000010000000000
 #define KNOB_INPUT				0b0100000000000000
-#define WIRELESS_IRQ_INPUT		0b1000000000000000
 #define TRISB_DEBUG				0b0000000001100000
 
 
@@ -74,10 +74,10 @@ extern "C" {
 //
 // Define the TRISA and TRISB configuration words
 //
-#define TRISAVAL ( IOIN_INPUT )
+#define TRISAVAL ( IOIN_INPUT | WIRELESS_IRQ_INPUT )
 
 // Update this when not debugging
-#define TRISBVAL ( TRISB_DEBUG | SPI_MISO_INPUT | KNOB_INPUT | WIRELESS_IRQ_INPUT )
+#define TRISBVAL ( TRISB_DEBUG | SPI_MISO_INPUT | KNOB_INPUT )
 
 
 // Kepyad constants
@@ -96,12 +96,12 @@ extern "C" {
 
 void init_io(void);
 int is_io_initialized(void);
-int set_isel(unsigned short val);
+int set_isel(unsigned char val);
 int set_lsel(unsigned val);
 unsigned get_iomux(void);
 
 void init_keypad(void);
-unsigned short scan_and_debounce_keypad(void);
+unsigned char scan_and_debounce_keypad(void);
 unsigned get_knob_sample(void);
 
 
