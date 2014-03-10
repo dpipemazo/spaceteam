@@ -1,0 +1,400 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% An example of a lab report write-up.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% This is a combination of several labs that I have done in the past for 
+% Computer Engineering, so it is not to be taken literally, but instead used as 
+% a great starting template for your own lab write up.  When creating this 
+% template, I tried to keep in mind all of the functions and functionality of 
+% LaTeX that I spent a lot of time researching and using in my lab reports and 
+% include them here so that it is fairly easy for students first learning LaTeX
+% to jump on in and get immediate results.  However, I do assume that the 
+% person using this guide has already created at least a "Hello World" PDF 
+% document using LaTeX (which means it's installed and ready to go). 
+%
+% My preference for developing in LaTeX is to use the LaTeX Plugin for gedit in 
+% Linux.  There are others for Mac and Windows as well (particularly MikTeX).  
+% Another excellent plugin is the Calc2LaTeX plugin for the OpenOffice suite.  
+% It makes it very easy to create a large table very quickly.  
+%
+% Professors have different tastes for how they want the lab write-ups done, so 
+% check with the section layout for your class and create a template file for 
+% each class (my recommendation).
+%
+% Also, there is a list of common commands at the bottom of this document.  Use
+% these as a quick reference.  If you'd like more, you can view the "LaTeX Cheat
+% Sheet.pdf" included with this template material. 
+%
+% (c) 2009 Derek R. Hildreth <derek@derekhildreth.com> http://www.derekhildreth.com 
+% This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/1.0/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[aps,letterpaper,10pt]{revtex4}
+\input kvmacros % For Karnaugh Maps (K-Maps)
+
+\usepackage{endnotes}
+\usepackage{graphicx} % For images
+\usepackage{float}    % For tables and other floats
+\usepackage{verbatim} % For comments and other
+\usepackage{amsmath}  % For math
+\usepackage{amssymb}  % For more math
+\usepackage{fullpage} % Set margins and place page numbers at bottom center
+\usepackage{listings} % For source code
+\usepackage{gensymb} %ohms and shit
+\usepackage{subfig}   % For subfigures
+\usepackage[usenames,dvipsnames]{color} % For colors and names
+\usepackage[pdftex]{hyperref}           % For hyperlinks and indexing the PDF
+\hypersetup{ % play with the different link colors here
+    colorlinks,
+    citecolor=blue,
+    filecolor=blue,
+    linkcolor=blue,
+    urlcolor=blue % set to black to prevent printing blue links
+}
+\usepackage{tikz} \usepackage{circuitikz} \usepackage{siunitx}
+
+\definecolor{mygrey}{gray}{.96} % Light Grey
+\lstset{ 
+	language=[ISO]C++,              % choose the language of the code ("language=Verilog" is popular as well)
+   tabsize=3,							  % sets the size of the tabs in spaces (1 Tab is replaced with 3 spaces)
+	basicstyle=\tiny,               % the size of the fonts that are used for the code
+	numbers=left,                   % where to put the line-numbers
+	numberstyle=\tiny,              % the size of the fonts that are used for the line-numbers
+	stepnumber=2,                   % the step between two line-numbers. If it's 1 each line will be numbered
+	numbersep=5pt,                  % how far the line-numbers are from the code
+	backgroundcolor=\color{mygrey}, % choose the background color. You must add \usepackage{color}
+	%showspaces=false,              % show spaces adding particular underscores
+	%showstringspaces=false,        % underline spaces within strings
+	%showtabs=false,                % show tabs within strings adding particular underscores
+	frame=single,	                 % adds a frame around the code
+	tabsize=3,	                    % sets default tabsize to 2 spaces
+	captionpos=b,                   % sets the caption-position to bottom
+	breaklines=true,                % sets automatic line breaking
+	breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+	%escapeinside={\%*}{*)},        % if you want to add a comment within your code
+	commentstyle=\color{BrickRed}   % sets the comment style
+}
+
+% Make units a little nicer looking and faster to type
+\newcommand{\Hz}{\textsl{Hz}}
+\newcommand{\KHz}{\textsl{KHz}}
+\newcommand{\MHz}{\textsl{MHz}}
+\newcommand{\GHz}{\textsl{GHz}}
+\newcommand{\ns}{\textsl{ns}}
+\newcommand{\ms}{\textsl{ms}}
+\newcommand{\s}{\textsl{s}}
+
+%for ease of entry
+\newcommand{\voltage}[1]{$V_{#1}$}
+\newcommand{\current}[1]{$I_{#1}$}
+\newcommand{\resistance}[1]{$R_{#1}$}
+\newcommand{\kiloohm}[1]{\SI{#1}{\kilo\ohm}}
+\newcommand{\ohms}[1]{\SI{#1}{\ohm}}
+
+%spacing
+%Custom indenting
+\newcommand{\single}{\hspace*{0.5cm}}
+\newcommand{\double}{\hspace*{1cm}}
+
+
+% TITLE PAGE CONTENT %%%%%%%%%%%%%%%%%%%%%%%%
+% Remember to fill this section out for each
+% lab write-up.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\labname}{EE91}
+\newcommand{\descript}{Spacecraft Teamwork Game}
+\newcommand{\authorname}{Dan Pipe-Mazo}
+\newcommand{\classno}{Winter Term 2014}
+\newcommand{\emailaddr}{dpipemazo@caltech.edu}
+\newcommand{\addr}{MSC 690}
+% END TITLE PAGE CONTENT %%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}  % START THE DOCUMENT!
+
+
+% TITLE PAGE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If you'd like to change the content of this,
+% do it in the "TITLE PAGE CONTENT" directly above
+% this message
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{titlepage}
+\begin{center}
+{\LARGE \textsc{\labname:} \\ \vspace{4pt}}
+{\Large \textsc{\descript} \\ \vspace{4pt}} 
+\rule[13pt]{\textwidth}{1pt} \\ \vspace{150pt}
+{\Large \textbf{\authorname} \\ \vspace{10pt}}
+{\large \emailaddr \\ \vspace{10pt}
+\addr \\ \vspace{10pt}
+\classno \\ \vspace{10pt}}
+\end{center}
+\end{titlepage}
+% END TITLE PAGE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Overview}
+
+The proposed project is a teamwork game with multiple, wirelessly connected game boards. Each board will contain a processing unit, a character display and multiple user input sources such as switches, knobs or an accelerometer. The goal of the game is to have the user perform the action displayed on the character display within a certain amount of time. However, the action shown on one user's display may only be able to be completed on a different user's game board. In this nuance lies the teamwork; users will have to communicate verbally to each other required actions and then perform any actions required on their own boards. This game is loosely based on the concept of the popular application "Space Team" which can be played with multiple connected iPhone or Android cell phones. \\
+
+The processing for the game will be distributed among the game boards; there will be no central processing unit. The boards will communicate via a wireless channel. Each board being used in the game will display a request to the user via the character display on their game board at all times. Every time that a user triggers an action on their game board (such as pressing a button or flipping a switch), the board will broadcast that the action has been completed. If any other game board is waiting for the particular action to be completed, it will do so until it receives the message that the action has been performed. If an action is not completed within the allotted time, the game ends. The object of the game is to have it last as long as possible. The game will be designed to accommodate at least 8 game boards, and will dynamically adapt to the number of game boards present for each individual session.\\
+
+The game will be space-themed, as the idea behind the game is that the users are working together to cooperatively pilot a "spacecraft". This game is intended for use in a  ditch day stack. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Operational Description}
+
+\noindent {\large\textsc{Inputs}}\\
+
+Each board will contain an identical set of gameplay inputs. The challenge of the game lies in that gameplay commands issued on board 1 will potentially relate to inputs on boards 2, 3, 4, etc. This will force users to communicate the commands which they see on their personal displays to other users. \\ 
+
+Each board will contain the following gameplay inputs:
+\begin{itemize}
+\item Two pushbuttons
+\item Two SPST switches
+\item One knob with greater than or equal to six positions
+\item One accelerometer capable of determining board orientation in three-dimensional space 
+\item One keypad with greater than or equal to 9 keys
+\item One standard Radio Frequency Identification Device (RFID) reader
+\end{itemize}
+
+The gameplay inputs will be used as the objects of gameplay commands. In order to use the RFID reader input, users will each be given a passive RFID beacon in addition to their game board. This will force users to switch boards during gameplay, since a command may be issued forcing User X to scan their RFID beacon on User Y's game board. \\
+
+Each board will also have both a reset and a begin button. The reset button will put the board into a device location mode, and each game board will attempt to connect with the other present game boards. After all boards are recognized, the user can press the begin button on their board to begin the game. \\
+
+All buttons and switches will be active low, with output pull-up resistors and grounded input terminals. \\
+
+\noindent {\large\textsc{Outputs}}\\
+
+Each game board will have a character display which will display commands to the user. The display will contain at least 20 characters and will allow for scrolling of long messages. It will be capable of showing at least the first 128 characters in the ASCII character set. \\
+
+Each game board will have a game health status indicator. This indicator will begin at its maximum value and will decrease as the game progresses according to the rules of the game. \\
+
+Each game board will have K LEDs, where K is the maximum number of allowable game boards per game session. These LEDs will be used to show which boards are networked properly before beginning a game. Whenever a game board networks with another game board, it will light up one of these LEDs to indicate to the user how many boards are present in the game and which boards are active. \\
+
+
+\noindent {\large\textsc{Wireless Communication}}\\
+
+Game boards will communicate wirelessly via a 2.4GHz channel. Game boards will issue four different kinds of messages: command request messages,  command complete messages, game health messages and board identification messages. All messages sent will have a message header which includes a unique board ID and the command type, followed by the command data.\\
+
+\noindent {\large\textsc{Messages}}\\
+
+Command request messages are generated by each game board. Command requests are generated at random from a list of all possible commands given the game boards present for the session. When a command request is generated, the command is displayed to the user via the character display, and then the command is broadcast to all other boards. A new command request is generated at the beginning of each session, after a game board receives a command complete message for its current pending request, or after a a board has been waiting for a command for an allotted amount of time. \\
+
+Command complete messages are generated by each game board. These messages are generated every time a user completes a pending request by modifying one of the user input devices. Pending requests are identified by each board maintaining a list of all command request messages which it receives. When a user modifies a user input device and this modification matches a pending request, the game board will remove the pending request from the pending requests list and broadcast a command complete message to the other game boards. The other game boards, upon receiving this command complete message will also remove the pending request from their pending requests lists. Any board which was waiting for the command to be completed will generate a new command request. \\
+
+Game health messages are generated by each game board. The game health initially begins at its maximum value. Every time that a command request is not completed within the allotted time, the game board which was waiting for the command will issue a game health message indicating all boards to decrease their health by a set value. When game health reaches zero, the game is over. \\
+
+Board identification messages are generated by each board. After power-up or reset, each board will generate an identification message. This will allow all of the boards present to synchronize before the game starts. \\
+
+\noindent {\large\textsc{Gameplay}}\\
+
+Each game will begin with N or greater game boards for N users. When users decide to begin the game, they will press the reset buttons on their boards. After pressing the reset button, each board will emit a board identification message, allowing the boards to network. When each game board has discovered another game board, it will light up one of its K status LEDs, where K is the maximum number of allowable game boards, indicating to the user how many game boards will be playing in the game. Once the user is satisfied with how many game boards have been recognized and are in the game, he or she will press the begin button on their board to begin the game. Once a single one of the networked users presses the begin button, the game will begin for all users. \\
+
+Once the game has begun, each user will immediately see a command on their character LCD. Assuming that we are user W, the command may be similar to "Press button 1 on user X's board" or "Turn the knob to 5 on user Y's board" or "Flip user Z's board upside-down". The user will then have to communicate to the appropriate player the instructions which they see on their character display within a set amount of time. If the command is successfully executed within the amount of time, then the game proceeds and the user's board generates a new command. If the command is not successfully executed, every player's game health is decreased and the game continues until game health reaches 0. \\
+
+The objective of the game is to last as long as possible without running out of health. As time progresses, the amount of time allotted for commands to be executed in will decrease, making the game more difficult over time. \\
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hardware}
+
+Each game board will require the hardware listed in the inputs and outputs sections above. \\
+
+Each game board will require a microprocessor capable of serial communications, either through SPI or I$^2$C with the accelerometer, RFID and wireless devices. This microprocessor will ideally be clocked upwards of 10MHz.\\
+
+In order to reduce the I/O line load on the microprocessor, the system may use a CPLD to help manage I/O. This CPLD would communicate with the microprocessor over a serial connection and would have enough I/O ports to monitor all of the user inputs and outputs. The CPLD will monitor user inputs for state changes, and will send serial commands to the microprocessor indicating the input which changed and its new state. The CPLD could also also handle driving the character display, the game health status indicator and the networking LEDs. Whether or not the CPLD will be used and the extent to which it may be used will be known once a microprocessor is selected.\\
+
+Each game board will require a 2.4GHz wireless communications module. The module will communicate with the process via either SPI or I$^2$C and will alert the microprocessor when data has been successfully sent. This will allow for some amount of error-checking in the system and will increase system robustness. \\
+
+Each game board will require a custom printed circuit board which will be designed to minimize total circuit footprint. \\
+
+All hardware will be designed and chosen to minimize total parts cost.\\
+ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Power}
+
+The game board will be designed to run on a battery pack which outputs between 3 and 5 volts. The battery pack will either allow for swapping of standard-sized batteries or for removal and recharging. The system will have enough stored power to allow for several hours of continuous gameplay. \\
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Packaging}
+
+The game board PCB will be made as small as possible in order to minimize cost. The packaging for the PCB will be a single laser-cut panel which houses all of the user inputs. The panel will have sides and a back, allowing for the electronics to be enclosed within a thin box. The box will be made to be hand-held, and will have the potential to be mounted on a wall through mounting joints on the back of the box. The packaging will have a space-like feel, as the game is intended to simulate users cooperatively flying a "spacecraft". \\
+
+All of the input devices will be mounted on the front panel in an organized manner. Next to each input will be the input's name, allowing users to translate commands from the character display to the input panel. Different game boards will have different names for the same inputs, i.e. a pushbutton on board 1 could be named "Fire laser" while on board 2 the same pushbutton could be named "Release waste". \\
+
+The top of the panel will contain the character display, the game health status indicator, the K networking LEDs, the reset button and the begin button. The remainder of the panel will contain the gameplay user inputs, arranged in a fashion to be decided. \\
+
+The back of the box will be removable to allow the swapping out of batteries. \\
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Schedule}
+The schedule for the project (by week) is proposed as:
+\begin{enumerate}
+\item Choose and order all coponents
+\item Create schematics
+\item Prototype design on breadboard
+\item	Lay out, route and send PCB for fabrication
+\item	Write software
+\item	Assemble processor on PCB, get processor to boot 
+\item	Assemble I/O on PCB, get processor to interact with I/O
+\item	Assemble wireless communications on PCB, get board-to-baord communications to work
+\item Design and create packaging. Debug software.
+\item Final assembly and test
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document} % DONE WITH DOCUMENT!
+
+
+%%%%%%%%%%
+PERSONAL FAVORITE LAB WRITE-UP STRUCTURE
+%%%%%%%%%%
+\section{Introduction}
+	% No Text Here
+	\subsection{Purpose}
+		% Lab objective
+	\subsection{Equipment}
+		% Any and all equipment used (specific!)
+	\subsection{Procedure}
+		% Overview of the procedure taken (not-so-specific!)
+\newpage
+\section{Schematic Diagrams}
+	% Any schematics, screenshots, block
+   % diagrams used.  Possibly photos or
+	% images could go here as well.
+\newpage
+\section{Experiment Data}
+	% Depending on lab, program code would be 
+	% included here without the Estimated and 
+	% Actual Results.
+	\subsection{Estimated Results}
+		% Calculated. What it should be.
+	\subsection{Actual Results}
+		% Measured.  What it actually was.
+\newpage
+\section{Discussion \& Conclusion}
+	% 3 Paragraphs:
+		% Restate the objective of the lab
+		% Discuss personal trials, errors, and difficulties
+		% Conclude the lab
+
+
+%%%%%%%%%%%%%%%%
+COMMON COMMANDS:
+%%%%%%%%%%%%%%%%
+% IMAGES
+begin{figure}[H]
+   \begin{center}
+      \includegraphics[width=0.6\textwidth]{RTL_SCHEM.png}
+   \end{center}
+\caption{A screenshot of the RTL Schematics produced from the Verilog code.}
+\label{RTL}
+\end{figure}
+
+% SUBFIGURES IMAGES
+\begin{figure}[H]
+  \centering
+  \subfloat[LED4 Period]{\label{fig:Per4}\includegraphics[width=0.4\textwidth]{period_led4.png}} \\                
+  \subfloat[LED5 Period]{\label{fig:Per5}\includegraphics[width=0.4\textwidth]{period_led5.png}}
+  \subfloat[LED6 Period]{\label{fig:Per6}\includegraphics[width=0.4\textwidth]{period_led6.png}}
+  \caption{Period of LED blink rate captured by osciliscope.}
+  \label{fig:oscil}
+\end{figure}
+
+% INSERT SOURCE CODE
+\lstset{language=Verilog, tabsize=3, backgroundcolor=\color{mygrey}, basicstyle=\small, commentstyle=\color{BrickRed}}
+\lstinputlisting{MODULE.v}
+
+% TEXT TABLE
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|c|c|l|}
+	x & x & x & x \\ \hline
+	x & x & x & x \\
+	x & x & x & x \\ \hline
+\end{tabular}
+\caption{Caption}
+\label{label}
+\end{center}
+\end{table}
+
+% MATHMATICAL ENVIRONMENT
+$ 8 = 2 \times 4 $
+
+% CENTERED FORMULA
+\[  \]
+
+% NUMBERED EQUATION
+\begin{equation}
+	
+\end{equation}
+
+% ARRAY OF EQUATIONS (The splat supresses the numbering)
+\begin{align*}
+	
+\end{align*}
+
+% NUMBERED ARRAY OF EQUATIONS
+\begin{align}
+	
+\end{align}
+
+% ACCENTS
+\dot{x} % dot
+\ddot{x} % double dot
+\bar{x} % bar
+\tilde{x} % tilde
+\vec{x} % vector
+\hat{x} % hat
+\acute{x} % acute
+\grave{x} % grave
+\breve{x} % breve
+\check{x} % dot (cowboy hat)
+
+% FONTS
+\mathrm{text} % roman
+\mathsf{text} % sans serif
+\mathtt{text} % Typewriter
+\mathbb{text} % Blackboard bold
+\mathcal{text} % Caligraphy
+\mathfrak{text} % Fraktur
+
+\textbf{text} % bold
+\textit{text} % italic
+\textsl{text} % slanted
+\textsc{text} % small caps
+\texttt{text} % typewriter
+\underline{text} % underline
+\emph{text} % emphasized
+
+\begin{tiny}text\end{tiny} % Tiny
+\begin{scriptsize}text\end{scriptsize} % Script Size
+\begin{footnotesize}text\end{footnotesize} % Footnote Size
+\begin{small}text\end{small} % Small
+\begin{normalsize}text\end{normalsize} % Normal Size
+\begin{large}text\end{large} % Large
+\begin{Large}text\end{Large} % Larger
+\begin{LARGE}text\end{LARGE} % Very Large
+\begin{huge}text\end{huge}   % Huge
+\begin{Huge}text\end{Huge}   % Very Huge
+
+
+% GENERATE TABLE OF CONTENTS AND/OR TABLE OF FIGURES
+% These seem to have some issues with the "revtex4" document class.  To use, change
+% the very first line of this document to "article" like this:
+% \documentclass[aps,letterpaper,10pt]{article}
+\tableofcontents
+\listoffigures
+\listoftables
+
+% INCLUDE A HYPERLINK OR URL
+\url{http://www.derekhildreth.com}
+\href{http://www.derekhildreth.com}{Derek Hildreth's Website}
+
+% FOR MORE, REFER TO THE "LINUX CHEAT SHEET.PDF" FILE INCLUDED!
