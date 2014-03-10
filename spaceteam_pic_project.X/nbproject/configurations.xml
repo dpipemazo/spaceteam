@@ -8,6 +8,8 @@
       <itemPath>spaceteam_display.h</itemPath>
       <itemPath>spaceteam_spi.h</itemPath>
       <itemPath>spaceteam_rfid.h</itemPath>
+      <itemPath>nRF24L01.h</itemPath>
+      <itemPath>spaceteam_wireless.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -21,6 +23,7 @@
       <itemPath>spaceteam_display.c</itemPath>
       <itemPath>spaceteam_spi.c</itemPath>
       <itemPath>spaceteam_rfid.c</itemPath>
+      <itemPath>spaceteam_wireless.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

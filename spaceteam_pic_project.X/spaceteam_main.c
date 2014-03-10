@@ -62,8 +62,8 @@ int main(void) {
     unsigned key;
     unsigned idx = 0;
     unsigned ad_val, ad_val_prev, id_val;
-    unsigned short num_bits;
-    unsigned short data[RFID_MAX_LEN];
+    unsigned char num_bits;
+    unsigned char data[RFID_ID_LEN];
     int i;
     char loop_str[] = "loop = x\0";
     unsigned hex;
@@ -88,13 +88,6 @@ int main(void) {
     // Initialize the RFID
     init_rfid();
 
-    id_val = rfid_read_reg(RFID_VERSION_REG);
-    display_write_hex(id_val, 0, 0);
-
-    __delay_ms(1000);
-
-
-    
     // Loop doing some sort of test
     while(1)
     {
@@ -114,29 +107,21 @@ int main(void) {
       display_clear();
 
       // Write the data that comes back
-      status = rfid_request_type(&data);
+      status = rfid_get_token(data);
       if (status == RFID_SUCCESS)
       {
-          status = rfid_request_id(&data);
-          if (status == RFID_SUCCESS)
-          {
-            // Compile the first 16 bits of hex of the ID
-            hex = data[0];
-            hex = hex << 8;
-            hex += data[1];
-            hex_to_string(hex, rfid_id);
-            // Compile the second 16 bits of hex of the ID
-            hex = data[2];
-            hex = hex << 8;
-            hex += data[3];
-            hex_to_string(hex, rfid_id + 4);
+          // Compile the first 16 bits of hex of the ID
+          hex = data[0];
+          hex = hex << 8;
+          hex += data[1];
+          hex_to_string(hex, rfid_id);
+          // Compile the second 16 bits of hex of the ID
+          hex = data[2];
+          hex = hex << 8;
+          hex += data[3];
+          hex_to_string(hex, rfid_id + 4);
 
-            display_write_line(0, rfid_id);
-          }
-          else
-          {
-            display_write_line(0, "RFID ERROR");
-          }
+          display_write_line(0, rfid_id);
       }
       else if(status == RFID_ERROR)
       {
@@ -146,11 +131,6 @@ int main(void) {
       {
         display_write_line(0, "NO CARD FOUND");
       }
-
-      // Write what loop we're on
-      loop_str[7] = i + '0';
-      i = (i + 1) % 10;
-      display_write_line(1, loop_str);
 
       __delay_ms(1000);
 

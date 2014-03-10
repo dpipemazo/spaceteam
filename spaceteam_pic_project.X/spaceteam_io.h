@@ -96,8 +96,8 @@ extern "C" {
 
 void init_io(void);
 int is_io_initialized(void);
-int set_isel(unsigned char val);
-int set_lsel(unsigned val);
+void set_isel(unsigned char val);
+void set_lsel(unsigned val);
 unsigned get_iomux(void);
 
 void init_keypad(void);

@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=spaceteam_main.c spaceteam_io.c spaceteam_display.c spaceteam_spi.c spaceteam_rfid.c
+SOURCEFILES_QUOTED_IF_SPACED=spaceteam_main.c spaceteam_io.c spaceteam_display.c spaceteam_spi.c spaceteam_rfid.c spaceteam_wireless.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/spaceteam_main.o ${OBJECTDIR}/spaceteam_io.o ${OBJECTDIR}/spaceteam_display.o ${OBJECTDIR}/spaceteam_spi.o ${OBJECTDIR}/spaceteam_rfid.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/spaceteam_main.o.d ${OBJECTDIR}/spaceteam_io.o.d ${OBJECTDIR}/spaceteam_display.o.d ${OBJECTDIR}/spaceteam_spi.o.d ${OBJECTDIR}/spaceteam_rfid.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/spaceteam_main.o ${OBJECTDIR}/spaceteam_io.o ${OBJECTDIR}/spaceteam_display.o ${OBJECTDIR}/spaceteam_spi.o ${OBJECTDIR}/spaceteam_rfid.o ${OBJECTDIR}/spaceteam_wireless.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/spaceteam_main.o.d ${OBJECTDIR}/spaceteam_io.o.d ${OBJECTDIR}/spaceteam_display.o.d ${OBJECTDIR}/spaceteam_spi.o.d ${OBJECTDIR}/spaceteam_rfid.o.d ${OBJECTDIR}/spaceteam_wireless.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/spaceteam_main.o ${OBJECTDIR}/spaceteam_io.o ${OBJECTDIR}/spaceteam_display.o ${OBJECTDIR}/spaceteam_spi.o ${OBJECTDIR}/spaceteam_rfid.o
+OBJECTFILES=${OBJECTDIR}/spaceteam_main.o ${OBJECTDIR}/spaceteam_io.o ${OBJECTDIR}/spaceteam_display.o ${OBJECTDIR}/spaceteam_spi.o ${OBJECTDIR}/spaceteam_rfid.o ${OBJECTDIR}/spaceteam_wireless.o
 
 # Source Files
-SOURCEFILES=spaceteam_main.c spaceteam_io.c spaceteam_display.c spaceteam_spi.c spaceteam_rfid.c
+SOURCEFILES=spaceteam_main.c spaceteam_io.c spaceteam_display.c spaceteam_spi.c spaceteam_rfid.c spaceteam_wireless.c
 
 
 CFLAGS=
@@ -114,6 +114,13 @@ ${OBJECTDIR}/spaceteam_rfid.o: spaceteam_rfid.c  nbproject/Makefile-${CND_CONF}.
 	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_rfid.c  -o ${OBJECTDIR}/spaceteam_rfid.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_rfid.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
 	@${FIXDEPS} "${OBJECTDIR}/spaceteam_rfid.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/spaceteam_wireless.o: spaceteam_wireless.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/spaceteam_wireless.o.d 
+	@${RM} ${OBJECTDIR}/spaceteam_wireless.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_wireless.c  -o ${OBJECTDIR}/spaceteam_wireless.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_wireless.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/spaceteam_wireless.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/spaceteam_main.o: spaceteam_main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
@@ -149,6 +156,13 @@ ${OBJECTDIR}/spaceteam_rfid.o: spaceteam_rfid.c  nbproject/Makefile-${CND_CONF}.
 	@${RM} ${OBJECTDIR}/spaceteam_rfid.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_rfid.c  -o ${OBJECTDIR}/spaceteam_rfid.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_rfid.o.d"      -g -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
 	@${FIXDEPS} "${OBJECTDIR}/spaceteam_rfid.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/spaceteam_wireless.o: spaceteam_wireless.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/spaceteam_wireless.o.d 
+	@${RM} ${OBJECTDIR}/spaceteam_wireless.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_wireless.c  -o ${OBJECTDIR}/spaceteam_wireless.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_wireless.o.d"      -g -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/spaceteam_wireless.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 

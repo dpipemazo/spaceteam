@@ -57,10 +57,10 @@ extern "C" {
 
 // Maximum size of the readback buffer for RFID
 #define RFID_MAX_LEN 			16
+#define RFID_ID_LEN				4
 
 // Chip selects
 #define RFID_CS 	LATBbits.LATB12
-#define WIRELESS_CS LATAbits.LATA7
 
 // Possible statuses for the RFID transactions
 typedef enum _rfid_status_t
@@ -72,10 +72,11 @@ typedef enum _rfid_status_t
 
 // Function declarations
 void init_rfid(void);
-void rfid_write_reg(unsigned short addr, unsigned short data);
-unsigned short rfid_read_reg(unsigned short addr);
-rfid_status_t rfid_request_type(unsigned short *data);
-rfid_status_t rfid_request_id(unsigned short *data);
+void rfid_write_reg(unsigned char addr, unsigned char data);
+unsigned char rfid_read_reg(unsigned char addr);
+rfid_status_t rfid_request_type(unsigned char *data);
+rfid_status_t rfid_request_id(unsigned char *data);
+rfid_status_t rfid_get_token(unsigned char *data);
 
 
 #ifdef	__cplusplus

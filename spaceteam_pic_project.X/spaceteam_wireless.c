@@ -28,11 +28,15 @@
 
 
 */
-#define _XTAL_FREQ 8000000
 #include "xc.h"
-#include "wl_module.h"
+#include "spaceteam_wireless.h"
 #include "nRF24L01.h"
 #include "spaceteam_spi.h"
+#include "spaceteam_display.h"
+#include <stddef.h>
+
+#define FCY 8000000UL
+#include <libpic30.h>
 
 // Defines for setting the wl_module registers for transmitting or receiving mode
 #define TX_POWERUP wl_module_config_register(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (0<<PRIM_RX) ) )
@@ -60,7 +64,7 @@ void wl_module_init(void)
     // We will be using external interrupt 2 for 
     //	the wireless module, on inout RA6, so set that up
     //
-    IPC7.INT2IP = 7;		// Set interrupt priority to highest (7)
+    IPC7bits.INT2IP = 7;		// Set interrupt priority to highest (7)
     IFS1bits.INT2IF = 0;	// Clear the interrupt flag, if it was set.
     INTCON2bits.INT2EP = 1; // Falling edge
     IEC1bits.INT2IE = 1;	// Enable interrupt 2
@@ -505,13 +509,13 @@ void _ISR _INT2Interrupt(void)
 
 
     if (status & (1<<TX_DS)){ // IRQ: Package has been sent
-    	display_string("PACKET SENT");
+    	display_write_line(1, "PACKET SENT");
 	    wl_module_config_register(STATUS, (1<<TX_DS)); //Clear Interrupt Bit
 	    PTX=0;
     }
 
 	if (status & (1<<MAX_RT)){ // IRQ: Package has not been sent, send again
-		display_string("PACKET NOT SENT");
+		display_write_line(1, "PACKET NOT SENT");
 		wl_module_config_register(STATUS, (1<<MAX_RT));	// Clear Interrupt Bit
 		wl_module_CE_hi; // Start transmission
 		__delay_us(10);
@@ -519,7 +523,7 @@ void _ISR _INT2Interrupt(void)
 	}
 
 	if (status & (1<<TX_FULL)){ //TX_FIFO Full <-- this is not an IRQ
-		display_string("TX FIFO FULL");
+		display_write_line(1, "TX FIFO FULL");
 		wl_module_CSN_lo; // Pull down chip select
 		spi_write(FLUSH_TX); // Flush TX-FIFO
 		wl_module_CSN_hi; // Pull up chip select

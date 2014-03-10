@@ -13,13 +13,13 @@
 static int init_done = 0;
 
 // variable for keypad column
-static unsigned short curr_col; 
+static unsigned char curr_col; 
 static unsigned debounce_counts[NUM_KEYS];
 
 // The constant array that maps key codes from the
 //  keypad function to their equivalent ASCII/command 
 //  value
-const unsigned short key_map[] = {
+const unsigned char key_map[] = {
                                     RUN_CODE, 7, 4, 1, // Column 1, from bottom to top
                                            0, 8, 5, 2, // Column 2,
                                     CLR_CODE, 9, 6, 3  // COlumn 3
@@ -64,15 +64,9 @@ int is_io_initialized(void)
 // Use this function to set the select lines of the
 //  IO mux to the passed value. Argument should
 //  be range [0,15].
-int set_isel(unsigned short val)
+void set_isel(unsigned char val)
 {
-    unsigned short temp_val;
-
-    // Error, argument out of range
-    if (val > 15)
-    {
-        return FAILURE;
-    }
+    unsigned char temp_val;
     
     // Read the previous value of port A
     temp_val = PORTA;
@@ -82,22 +76,16 @@ int set_isel(unsigned short val)
     LATA = temp_val;
 
     // Success, so return 0
-    return SUCCESS;
+    return;
 }
 
 
 // Use this function to set the select lines of the
 //  LED mux to the passed value. Argument should
 //  be range [0,15].
-int set_lsel(unsigned val)
+void set_lsel(unsigned val)
 {
     unsigned temp_val;
-
-    // Error, argument out of range
-    if (val > 15)
-    {
-        return FAILURE;
-    }
     
     // Read the previous value of port B
     temp_val = PORTB;
@@ -107,7 +95,7 @@ int set_lsel(unsigned val)
     LATB = temp_val;
 
     // Success, so return 0
-    return SUCCESS;
+    return;
 }
 
 // Use this function to get the value of IO mux
@@ -145,7 +133,7 @@ void init_keypad(void)
 //  as it is currently written. If two keys are pressed at the same
 //  exact time, one will be missed. In practice, this is probably
 //  quite difficult.
-unsigned short scan_and_debounce_keypad(void)
+unsigned char scan_and_debounce_keypad(void)
 {
     unsigned curr_portb;
     int i, idx;

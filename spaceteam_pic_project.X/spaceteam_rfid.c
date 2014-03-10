@@ -13,7 +13,7 @@
 // This function will initialize the RFID module
 void init_rfid(void)
 {
-	unsigned short temp_val;
+	unsigned char temp_val;
 
 	// Make sure that SPI is initialized
 	if (!is_spi_initialized())
@@ -56,7 +56,7 @@ void init_rfid(void)
 }
 
 // This function writes a command to the RC522 module
-void rfid_write_reg(unsigned short addr, unsigned short data)
+void rfid_write_reg(unsigned char addr, unsigned char data)
 {
 	// Need to set the chip select low
 	RFID_CS = 0;
@@ -73,9 +73,9 @@ void rfid_write_reg(unsigned short addr, unsigned short data)
 }
 
 // This function reads a register from the RC522 module
-unsigned short rfid_read_reg(unsigned short addr)
+unsigned char rfid_read_reg(unsigned char addr)
 {
-	unsigned short ret_val;
+	unsigned char ret_val;
 
 	// Need to set the chip select low
 	RFID_CS = 0;
@@ -95,9 +95,9 @@ unsigned short rfid_read_reg(unsigned short addr)
 //	reading the register and then OR-ing the register
 //	value with the bitmask, thus setting all bits 
 //	set in the bitmask
-void rfid_set_bits(unsigned short reg, unsigned short mask)
+void rfid_set_bits(unsigned char reg, unsigned char mask)
 {
-	unsigned short temp_val;
+	unsigned char temp_val;
 
 	temp_val = rfid_read_reg(reg);
 	rfid_write_reg(reg, (temp_val | mask));
@@ -107,9 +107,9 @@ void rfid_set_bits(unsigned short reg, unsigned short mask)
 //	by reading in the register and then ANDing the 
 //	register with the logical not of the bitmask, 
 //	thus zeroing all bits set in the mask
-void rfid_clear_bits(unsigned short reg, unsigned short mask)
+void rfid_clear_bits(unsigned char reg, unsigned char mask)
 {
-	unsigned short temp_val;
+	unsigned char temp_val;
 
 	temp_val = rfid_read_reg(reg);
 	rfid_write_reg(reg, (temp_val & (~mask)));
@@ -119,11 +119,11 @@ void rfid_clear_bits(unsigned short reg, unsigned short mask)
 //	a command to perform, a buffer of input data, a length of the input data buffer, 
 //	and output data buffer of size MAX_LEN and an output pointer to the length of 
 //	data in the buffer.
-rfid_status_t rfid_transcieve(unsigned short * datain, unsigned short datain_len, unsigned short * dataout, unsigned short * dataout_len)
+rfid_status_t rfid_transcieve(unsigned char * datain, unsigned char datain_len, unsigned char * dataout, unsigned char * dataout_len)
 {
-	unsigned short irq_reg = 0;
-	unsigned short num_bytes = 0;
-	unsigned short num_bits = 0;
+	unsigned char irq_reg = 0;
+	unsigned char num_bytes = 0;
+	unsigned char num_bits = 0;
 	int i;
 	rfid_status_t status = RFID_ERROR;
 
@@ -215,10 +215,10 @@ rfid_status_t rfid_transcieve(unsigned short * datain, unsigned short datain_len
 // This function sends a request to an RFID card, and will 
 //	return the card's MIFARE type in the data array. Data array
 //	must be DATA_MAX_LEN bytes
-rfid_status_t rfid_request_type(unsigned short *data)
+rfid_status_t rfid_request_type(unsigned char *data)
 {
 	// Data array which will be used for I/O
-	unsigned short data_len;
+	unsigned char data_len;
 	rfid_status_t status;
 
 	// Want to perform a write to the bit framing register, 
@@ -246,13 +246,13 @@ rfid_status_t rfid_request_type(unsigned short *data)
 // This function sends a request to an RFID card, and will 
 //	return the card's serial identifier in the data array. Data array
 //	must be DATA_MAX_LEN bytes
-rfid_status_t rfid_request_id(unsigned short *data)
+rfid_status_t rfid_request_id(unsigned char *data)
 {
 	// Data array which will be used for I/O
-	unsigned short data_len;
+	unsigned char data_len;
 	rfid_status_t status;
 	int i;
-	unsigned short xor_check = 0;
+	unsigned char xor_check = 0;
 
 	// Want to perform a write to the bit framing register, 
 	//	to set up transmit of all of the bits of the
@@ -293,6 +293,40 @@ rfid_status_t rfid_request_id(unsigned short *data)
 	}
 
 	// Return the number of bits received
+	return status;
+}
+
+// This function is used to get the 4-byte token from
+//	an RFID card. It calls get_type() and then get_id()
+//	in succession and will return 4 bytes in an array
+rfid_status_t rfid_get_token(unsigned char *data)
+{
+	// Make an input buffer of the largest possible size
+	unsigned char temp_data[RFID_MAX_LEN];
+	// Make a local variable for the status
+	rfid_status_t status;
+	// Loop variable
+	int i;
+
+	// Request the type to wake the card up
+	status = rfid_request_type(temp_data);
+	// If we got a valid type
+	if (status == RFID_SUCCESS)
+	{
+		// Request the ID from the card
+		status = rfid_request_id(temp_data);
+		// If we got a valid ID
+		if (status == RFID_SUCCESS)
+		{
+			// Copy the first four bytes from the temporary data array to the 
+			//	input data array
+			for (i = 0; i < RFID_ID_LEN; i++)
+			{
+				data[i] = temp_data[i];
+			}
+		}
+	}
+
 	return status;
 }
 

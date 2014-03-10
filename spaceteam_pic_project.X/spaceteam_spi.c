@@ -5,6 +5,7 @@
  */
 
  #include "xc.h"
+ #include <stddef.h>
 
  static char init_done = 0;
 
