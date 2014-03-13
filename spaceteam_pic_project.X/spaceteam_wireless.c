@@ -50,6 +50,8 @@ void init_wireless(void)
 // Initializes pins and interrupt to communicate with the wl_module
 // Should be called in the early initializing phase at startup.
 {
+	unsigned char status;
+
     // Define CSN and CE as Output and set them to default
     wl_module_CE_lo;
     wl_module_CSN_hi;
@@ -59,6 +61,9 @@ void init_wireless(void)
     {
     	init_spi();
     }
+
+    // Clear all pending interrupts for the wireless controller
+    wl_module_config_register(STATUS, 0x70);
 
     // 
     // We will be using external interrupt 2 for 
@@ -517,16 +522,16 @@ void _ISR _INT2Interrupt(void)
 	if (status & (1<<MAX_RT)){ // IRQ: Package has not been sent, send again
 		display_write_line(1, "PACKET NOT SENT");
 		wl_module_config_register(STATUS, (1<<MAX_RT));	// Clear Interrupt Bit
-		wl_module_CE_hi; // Start transmission
-		__delay_us(10);
-		wl_module_CE_lo;
+		// wl_module_CE_hi; // Start transmission
+		// __delay_us(10);
+		// wl_module_CE_lo;
 	}
 
 	if (status & (1<<TX_FULL)){ //TX_FIFO Full <-- this is not an IRQ
 		display_write_line(1, "TX FIFO FULL");
-		wl_module_CSN_lo; // Pull down chip select
-		spi_write(FLUSH_TX); // Flush TX-FIFO
-		wl_module_CSN_hi; // Pull up chip select
+		// wl_module_CSN_lo; // Pull down chip select
+		// spi_write(FLUSH_TX); // Flush TX-FIFO
+		// wl_module_CSN_hi; // Pull up chip select
 	}
 
     // reset INT2 flag

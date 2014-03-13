@@ -63,9 +63,10 @@ int main(void) {
     unsigned char data[RFID_MAX_LEN];
     int i;
     unsigned hex;
-    char buf[] = "loop = x";
+    // char buf[] = "loop = x";
     rfid_status_t status;
     char rfid_id[10];
+    char payload[wl_module_PAYLOAD] = "HELLO WORLD!";
 
     // Initialize the data to make sure we're getting something
     for (i = 0; i < RFID_MAX_LEN; i++)
@@ -88,6 +89,14 @@ int main(void) {
     // Initialize the wireless
     init_wireless();
 
+    // Set up this module as a sender
+    wl_module_tx_config(0);
+
+    // Send a single packet, and see how it goes
+    wl_module_send(payload, wl_module_PAYLOAD);
+
+
+
     // Loop doing some sort of test
     while(1)
     {
@@ -104,7 +113,6 @@ int main(void) {
       //
       // RFID Test
       //
-      display_clear();
 
       // Write the data that comes back
       status = rfid_get_token(data);
@@ -125,14 +133,11 @@ int main(void) {
       }
       else if(status == RFID_ERROR)
       {
-        display_write_line(0, "RFID ERROR");
+        display_write_line(0, "RFID ERROR   ");
       }
       else
       {
         display_write_line(0, "NO CARD FOUND");
-        buf[7] = ('0' + i);
-        i = (i + 1) % 10;
-        display_write_line(1, buf);
       }
 
       __delay_ms(1000);
