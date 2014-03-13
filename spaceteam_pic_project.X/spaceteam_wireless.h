@@ -66,7 +66,7 @@ extern volatile unsigned char PTX;
 #define RX_POWERUP wl_module_config_register(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (1<<PRIM_RX) ) )
 
 // Public standard functions
-extern void wl_module_init(void);
+extern void init_wireless(void);
 extern void wl_module_config(void);
 extern void wl_module_send(unsigned char * value, unsigned char len);
 extern void wl_module_set_RADDR(unsigned char * adr);

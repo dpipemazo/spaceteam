@@ -46,7 +46,7 @@
 // Flag which denotes transmitting mode
 volatile unsigned char PTX;
 
-void wl_module_init(void)
+void init_wireless(void)
 // Initializes pins and interrupt to communicate with the wl_module
 // Should be called in the early initializing phase at startup.
 {

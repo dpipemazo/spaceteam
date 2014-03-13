@@ -9,6 +9,7 @@
 #include "spaceteam_io.h"
 #include "spaceteam_display.h"
 #include "spaceteam_rfid.h"
+#include "spaceteam_wireless.h"
 
 //
 // Define the clock frequency
@@ -59,14 +60,10 @@
 #pragma config ICS = PGx3               // ICD Pin Placement Select (EMUC/EMUD share PGC3/PGD3)
 
 int main(void) {
-    unsigned key;
-    unsigned idx = 0;
-    unsigned ad_val, ad_val_prev, id_val;
-    unsigned char num_bits;
-    unsigned char data[RFID_ID_LEN];
+    unsigned char data[RFID_MAX_LEN];
     int i;
-    char loop_str[] = "loop = x\0";
     unsigned hex;
+    char buf[] = "loop = x";
     rfid_status_t status;
     char rfid_id[10];
 
@@ -87,6 +84,9 @@ int main(void) {
 
     // Initialize the RFID
     init_rfid();
+
+    // Initialize the wireless
+    init_wireless();
 
     // Loop doing some sort of test
     while(1)
@@ -130,6 +130,9 @@ int main(void) {
       else
       {
         display_write_line(0, "NO CARD FOUND");
+        buf[7] = ('0' + i);
+        i = (i + 1) % 10;
+        display_write_line(1, buf);
       }
 
       __delay_ms(1000);

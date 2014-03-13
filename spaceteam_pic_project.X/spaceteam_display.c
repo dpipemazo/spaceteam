@@ -226,6 +226,8 @@ void display_write_string(char *str_to_write)
 void display_set_address(unsigned short address)
 {
 	display_write_command(DISPLAY_ADDRESS_DATA | address);
+
+	__delay_us(50);
 }
 
 // Write up to 16 characters on a line of the display. 
