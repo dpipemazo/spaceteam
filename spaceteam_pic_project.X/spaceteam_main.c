@@ -67,6 +67,7 @@ int main(void) {
     rfid_status_t status;
     char rfid_id[10];
     char payload[wl_module_PAYLOAD] = "Hello World!!!!!";
+    char address[wl_module_ADDR_LEN] = {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
 
     // Initialize the data to make sure we're getting something
     for (i = 0; i < RFID_MAX_LEN; i++)
@@ -86,25 +87,14 @@ int main(void) {
     // Initialize the RFID
     init_rfid();
 
-    // Initialize the wireless
-    init_wireless();
+    // Initialize the wireless to the address given
+    init_wireless(address);
 
-// If we are the master, then configure ourselves as TX and
-//  send the data
-#ifdef WIRELESS_MASTER
-    // Set up this module as a sender
-    wl_module_tx_config(wl_module_TX_NR_0);
-
-    // Send a single packet, and see how it goes
-    wl_module_send(payload, wl_module_PAYLOAD);
-// If we are the slave, configure as a receiver and just
-//  wait it out
-#else
-    wl_module_config();
-
-    // Enable all interrupts on the wireless chip
-    wl_module_config_register(0x0, 0x0F);
-#endif
+    // If we are the master, then we need to send a packet
+    #ifdef WIRELESS_MASTER
+        // Send a single packet, and see how it goes
+        wl_module_send(payload, wl_module_PAYLOAD);
+    #endif
 
     // Loop doing some sort of test
     while(1)

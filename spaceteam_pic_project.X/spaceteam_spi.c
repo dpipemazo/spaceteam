@@ -55,7 +55,7 @@ unsigned char spi_write(unsigned char data)
  // This function performs SPI writes on a bufffer of input data and
  // reads the results to a buffer of output data, unless the output data
  // pointer is NULL
- void spi_write_multiple(unsigned char * datain, unsigned char * dataout, unsigned int length)
+ void spi_write_multiple(unsigned char * datain, unsigned char * dataout, unsigned char length)
  {
     int i;
     unsigned char temp_val;
