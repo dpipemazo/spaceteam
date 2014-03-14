@@ -33,6 +33,7 @@
 #include "nRF24L01.h"
 #include "spaceteam_spi.h"
 #include "spaceteam_display.h"
+#include "spaceteam_rfid.h"
 #include <stddef.h>
 
 #define FCY 8000000UL
@@ -42,9 +43,9 @@
 #define TX_POWERUP wl_module_config_register(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (0<<PRIM_RX) ) )
 #define RX_POWERUP wl_module_config_register(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (1<<PRIM_RX) ) )
 
-
 // Flag which denotes transmitting mode
 volatile unsigned char PTX;
+char pload_data[wl_module_PAYLOAD];
 
 void init_wireless(void)
 // Initializes pins and interrupt to communicate with the wl_module
@@ -61,6 +62,15 @@ void init_wireless(void)
     {
     	init_spi();
     }
+
+    // And flush the TX and RX FIFOs
+    wl_module_CSN_lo;
+    spi_write(FLUSH_RX);
+    __delay_ms(1);
+    spi_write(FLUSH_TX);
+
+    // Enable all interrupts on the wireless chip
+    wl_module_config_register(CONFIG, 0x0F);
 
     // Clear all pending interrupts for the wireless controller
     wl_module_config_register(STATUS, 0x70);
@@ -86,6 +96,9 @@ void wl_module_config(void)
 	wl_module_config_register(RF_SETUP,wl_module_RF_SETUP);
 	// Set length of incoming payload
     wl_module_config_register(RX_PW_P0, wl_module_PAYLOAD);
+
+    // Enable all interrupts on the wireless chip
+    wl_module_config_register(CONFIG, 0x0F);
 
     // Start receiver
     PTX = 0;        // Start in receiving mode
@@ -437,15 +450,15 @@ return status;
 
 }
 
-extern unsigned char wl_module_get_data(unsigned char * data)
+unsigned char wl_module_get_data(unsigned char * data)
 // Reads wl_module_PAYLOAD bytes into data array
 {
 	unsigned char status;
+
     wl_module_CSN_lo;                               // Pull down chip select
     status = spi_write( R_RX_PAYLOAD );            // Send cmd to read rx payload
     spi_write_multiple(data,data,wl_module_PAYLOAD); // Read payload
     wl_module_CSN_hi;                               // Pull up chip select
-    wl_module_config_register(STATUS,(1<<RX_DR));   // Reset status register
 	return status;
 }
 
@@ -506,6 +519,11 @@ void wl_module_send(unsigned char * value, unsigned char len)
 void _ISR _INT2Interrupt(void)
 {
 	unsigned char status;
+	unsigned char rfid_cs_val;
+
+	// Pull the RFID chip select high
+	rfid_cs_val = RFID_CS;
+	RFID_CS = 1;
 
     // Read wl_module status
     wl_module_CSN_lo; // Pull down chip select
@@ -522,18 +540,24 @@ void _ISR _INT2Interrupt(void)
 	if (status & (1<<MAX_RT)){ // IRQ: Package has not been sent, send again
 		display_write_line(1, "PACKET NOT SENT");
 		wl_module_config_register(STATUS, (1<<MAX_RT));	// Clear Interrupt Bit
-		// wl_module_CE_hi; // Start transmission
-		// __delay_us(10);
-		// wl_module_CE_lo;
+		wl_module_CE_hi; // Start transmission
+		__delay_us(10);
+		wl_module_CE_lo;
 	}
 
-	if (status & (1<<TX_FULL)){ //TX_FIFO Full <-- this is not an IRQ
-		display_write_line(1, "TX FIFO FULL");
-		// wl_module_CSN_lo; // Pull down chip select
-		// spi_write(FLUSH_TX); // Flush TX-FIFO
-		// wl_module_CSN_hi; // Pull up chip select
+	if (status & (1<<RX_DR)){
+		wl_module_get_data(pload_data); // And get the data
+		display_write_line(1, pload_data); // And write it to the display for test
+		wl_module_config_register(STATUS, (1<<RX_DR)); //Clear Interrupt Bit
 	}
+
+	// Drop the RFID CS again
+	RFID_CS = rfid_cs_val;
 
     // reset INT2 flag
     IFS1bits.INT2IF = 0;
 }
+
+
+
+

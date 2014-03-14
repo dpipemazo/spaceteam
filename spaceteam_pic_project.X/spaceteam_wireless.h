@@ -35,6 +35,12 @@
 #include "xc.h"
 #include "spi.h"
 
+//
+// CHANGE THIS TO CHANGE FROM WIRELESS MASTER TO SLAVE
+//  Comment out the define to be a slave
+//
+#define WIRELESS_MASTER
+
 //Externe Variable deklarieren
 extern volatile unsigned char PTX;
 
@@ -61,7 +67,7 @@ extern volatile unsigned char PTX;
 #define wl_module_CE_hi      LATBbits.CE = 1;
 #define wl_module_CE_lo      LATBbits.CE = 0;
 
-// Defines for setting the wl_module registers for transmitting or receiving mode
+// Defines for setting the wl_module `s for transmitting or receiving mode
 #define TX_POWERUP wl_module_config_register(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (0<<PRIM_RX) ) )
 #define RX_POWERUP wl_module_config_register(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (1<<PRIM_RX) ) )
 

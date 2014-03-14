@@ -62,11 +62,11 @@
 int main(void) {
     unsigned char data[RFID_MAX_LEN];
     int i;
-    unsigned hex;
+    unsigned char hex;
     // char buf[] = "loop = x";
     rfid_status_t status;
     char rfid_id[10];
-    char payload[wl_module_PAYLOAD] = "HELLO WORLD!";
+    char payload[wl_module_PAYLOAD] = "Hello World!!!!!";
 
     // Initialize the data to make sure we're getting something
     for (i = 0; i < RFID_MAX_LEN; i++)
@@ -89,13 +89,22 @@ int main(void) {
     // Initialize the wireless
     init_wireless();
 
+// If we are the master, then configure ourselves as TX and
+//  send the data
+#ifdef WIRELESS_MASTER
     // Set up this module as a sender
-    wl_module_tx_config(0);
+    wl_module_tx_config(wl_module_TX_NR_0);
 
     // Send a single packet, and see how it goes
     wl_module_send(payload, wl_module_PAYLOAD);
+// If we are the slave, configure as a receiver and just
+//  wait it out
+#else
+    wl_module_config();
 
-
+    // Enable all interrupts on the wireless chip
+    wl_module_config_register(0x0, 0x0F);
+#endif
 
     // Loop doing some sort of test
     while(1)
@@ -104,43 +113,44 @@ int main(void) {
       //
       // LED TEST
       //
-      // for (idx = 0; idx < 4; idx++)
-      // {
-      //   set_lsel(idx);
-      //   __delay_ms(500);
-      // }
+      for (i = 0; i < 4; i++)
+      {
+        set_lsel(i);
+        // Read the config register and see what's up
+        __delay_ms(500);
+      }
 
       //
       // RFID Test
       //
 
       // Write the data that comes back
-      status = rfid_get_token(data);
-      if (status == RFID_SUCCESS)
-      {
-          // Compile the first 16 bits of hex of the ID
-          hex = data[0];
-          hex = hex << 8;
-          hex += data[1];
-          hex_to_string(hex, rfid_id);
-          // Compile the second 16 bits of hex of the ID
-          hex = data[2];
-          hex = hex << 8;
-          hex += data[3];
-          hex_to_string(hex, rfid_id + 4);
+      // status = rfid_get_token(data);
+      // if (status == RFID_SUCCESS)
+      // {
+      //     // Compile the first 16 bits of hex of the ID
+      //     hex = data[0];
+      //     hex = hex << 8;
+      //     hex += data[1];
+      //     hex_to_string(hex, rfid_id);
+      //     // Compile the second 16 bits of hex of the ID
+      //     hex = data[2];
+      //     hex = hex << 8;
+      //     hex += data[3];
+      //     hex_to_string(hex, rfid_id + 4);
 
-          display_write_line(0, rfid_id);
-      }
-      else if(status == RFID_ERROR)
-      {
-        display_write_line(0, "RFID ERROR   ");
-      }
-      else
-      {
-        display_write_line(0, "NO CARD FOUND");
-      }
+      //     display_write_line(0, rfid_id);
+      // }
+      // else if(status == RFID_ERROR)
+      // {
+      //   display_write_line(0, "RFID ERROR   ");
+      // }
+      // else
+      // {
+      //   display_write_line(0, "NO CARD FOUND");
+      // }
 
-      __delay_ms(1000);
+      // __delay_ms(1000);
 
 
       //
