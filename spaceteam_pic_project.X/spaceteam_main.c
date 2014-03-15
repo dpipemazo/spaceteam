@@ -6,10 +6,7 @@
  */
 
 #include "xc.h"
-#include "spaceteam_io.h"
-#include "spaceteam_display.h"
-#include "spaceteam_rfid.h"
-#include "spaceteam_wireless.h"
+#include "spaceteam_game.h"
 
 //
 // Define the clock frequency
@@ -60,148 +57,15 @@
 #pragma config ICS = PGx3               // ICD Pin Placement Select (EMUC/EMUD share PGC3/PGD3)
 
 int main(void) {
-    unsigned char data[RFID_MAX_LEN];
-    int i;
-    unsigned char hex;
-    // char buf[] = "loop = x";
-    rfid_status_t status;
-    char rfid_id[10];
-    char payload[wl_module_PAYLOAD_LEN] = "Hello World!";
-    unsigned char address[wl_module_ADDR_LEN] = {0x12, 0x34, 0x56, 0x78, 0x9A};
-    char curr_addr[wl_module_ADDR_LEN];
+    
+    // Want to initialize the game
+    init_game();
 
-    // Initialize the data to make sure we're getting something
-    for (i = 0; i < RFID_MAX_LEN; i++)
-    {
-      data[i] = 0xFF;
-    }
-
-    i = 0;
-
-
-    // Init the IO
-    init_io();
-
-    // Initialize the display, and do a quick display test
-    init_display();
-
-    // Initialize the RFID
-    // init_rfid();
-
-    // Initialize the wireless to the address given
-    init_wireless(address);
-
-    // If we are the master, then we need to send a packet
-    #ifdef WIRELESS_MASTER
-        // Send a single packet, and see how it goes
-        wl_module_send_payload(payload, address);
-    #endif
-
-    // Loop doing some sort of test
     while(1)
     {
-
-      //
-      // LED TEST
-      //
-      for (i = 0; i < 4; i++)
-      {
-        set_lsel(i);
-        // Read the config register and see what's up
-        __delay_ms(1000);
-      }
-
-      //
-      // RFID Test
-      //
-
-      // Write the data that comes back
-      // status = rfid_get_token(data);
-      // if (status == RFID_SUCCESS)
-      // {
-      //     // Compile the first 16 bits of hex of the ID
-      //     hex = data[0];
-      //     hex = hex << 8;
-      //     hex += data[1];
-      //     hex_to_string(hex, rfid_id);
-      //     // Compile the second 16 bits of hex of the ID
-      //     hex = data[2];
-      //     hex = hex << 8;
-      //     hex += data[3];
-      //     hex_to_string(hex, rfid_id + 4);
-
-      //     display_write_line(0, rfid_id);
-      // }
-      // else if(status == RFID_ERROR)
-      // {
-      //   display_write_line(0, "RFID ERROR   ");
-      // }
-      // else
-      // {
-      //   display_write_line(0, "NO CARD FOUND");
-      // }
-
-      // __delay_ms(1000);
-
-
-      //
-      // A/D Test
-      //
-      // ad_val = get_knob_sample();
-      // if(ad_val != ad_val_prev)
-      // {
-      //   display_clear();
-      //   display_write_hex(ad_val);
-      //   ad_val_prev = ad_val;
-      // }
-
-      // __delay_ms(500)
-
-
-      //
-      // Keypad test
-      //
-
-      // key = scan_and_debounce_keypad();
-
-      // if (key != NO_KEY)
-      // {
-
-      //   // For lols, turn on the LED of the key
-      //   set_lsel(key);
-
-      //   if (idx == 16)
-      //   {
-      //     display_set_address(0x40);
-      //   }
-      //   else if (idx == 32)
-      //   {
-      //     display_set_address(0x00);
-      //     idx = 0;
-      //   }
-
-      //   // How to handle the different keys
-      //   switch(key)
-      //   {
-      //     case CLR_CODE:
-      //       display_clear();
-      //       idx = 0;
-      //       break;
-
-      //     case RUN_CODE:
-      //       display_clear();
-      //       display_write_string("RUN!");
-      //       idx = 0;
-      //       break;
-
-      //     default:
-      //       display_write_char('0' + key);
-      //       idx++;
-      //       break;
-      //   }
-
-      // }
-      
+        // Everything should be done in interrupts.... so 
+        //  we can theoretically just NOP in here unless
+        //  we have something better to do
     }
 
     return 0;

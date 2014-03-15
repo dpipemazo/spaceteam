@@ -51,8 +51,6 @@ unsigned char pload_data[wl_module_PAYLOAD_LEN];
 //
 void init_wireless(unsigned char * address)
 {
-	char curr_addr[wl_module_ADDR_LEN];
-
     // Define CSN and CE as Output and set them to default
     wl_module_CE_lo;
     wl_module_CSN_hi;
@@ -249,20 +247,17 @@ void _ISR _INT2Interrupt(void)
 
 
     if (status & (1<<TX_DS)){ // IRQ: Package has been sent
-    	display_write_line(1, "PACKET SENT");
 	    wl_module_write_register_byte(STATUS, (1<<TX_DS)); //Clear Interrupt Bit
 	    PTX=0;
     }
 
 	if (status & (1<<MAX_RT)){ // IRQ: Package has not been sent, send again
-		display_write_line(1, "PACKET NOT SENT");
 		wl_module_write_register_byte(STATUS, (1<<MAX_RT));	// Clear Interrupt Bit
 		wl_module_start_transmit();
 	}
 
 	if (status & (1<<RX_DR)){
 		wl_module_get_payload(pload_data); // And get the data
-		display_write_line(1, pload_data); // And write it to the display for test
 		wl_module_write_register_byte(STATUS, (1<<RX_DR)); //Clear Interrupt Bit
 	}
 

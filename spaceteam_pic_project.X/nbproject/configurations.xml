@@ -10,6 +10,8 @@
       <itemPath>spaceteam_rfid.h</itemPath>
       <itemPath>nRF24L01.h</itemPath>
       <itemPath>spaceteam_wireless.h</itemPath>
+      <itemPath>spaceteam_game.h</itemPath>
+      <itemPath>spaceteam_msg.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -24,6 +26,8 @@
       <itemPath>spaceteam_spi.c</itemPath>
       <itemPath>spaceteam_rfid.c</itemPath>
       <itemPath>spaceteam_wireless.c</itemPath>
+      <itemPath>spaceteam_game.c</itemPath>
+      <itemPath>spaceteam_msg.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

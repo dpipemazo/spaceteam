@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=spaceteam_main.c spaceteam_io.c spaceteam_display.c spaceteam_spi.c spaceteam_rfid.c spaceteam_wireless.c
+SOURCEFILES_QUOTED_IF_SPACED=spaceteam_main.c spaceteam_io.c spaceteam_display.c spaceteam_spi.c spaceteam_rfid.c spaceteam_wireless.c spaceteam_game.c spaceteam_msg.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/spaceteam_main.o ${OBJECTDIR}/spaceteam_io.o ${OBJECTDIR}/spaceteam_display.o ${OBJECTDIR}/spaceteam_spi.o ${OBJECTDIR}/spaceteam_rfid.o ${OBJECTDIR}/spaceteam_wireless.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/spaceteam_main.o.d ${OBJECTDIR}/spaceteam_io.o.d ${OBJECTDIR}/spaceteam_display.o.d ${OBJECTDIR}/spaceteam_spi.o.d ${OBJECTDIR}/spaceteam_rfid.o.d ${OBJECTDIR}/spaceteam_wireless.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/spaceteam_main.o ${OBJECTDIR}/spaceteam_io.o ${OBJECTDIR}/spaceteam_display.o ${OBJECTDIR}/spaceteam_spi.o ${OBJECTDIR}/spaceteam_rfid.o ${OBJECTDIR}/spaceteam_wireless.o ${OBJECTDIR}/spaceteam_game.o ${OBJECTDIR}/spaceteam_msg.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/spaceteam_main.o.d ${OBJECTDIR}/spaceteam_io.o.d ${OBJECTDIR}/spaceteam_display.o.d ${OBJECTDIR}/spaceteam_spi.o.d ${OBJECTDIR}/spaceteam_rfid.o.d ${OBJECTDIR}/spaceteam_wireless.o.d ${OBJECTDIR}/spaceteam_game.o.d ${OBJECTDIR}/spaceteam_msg.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/spaceteam_main.o ${OBJECTDIR}/spaceteam_io.o ${OBJECTDIR}/spaceteam_display.o ${OBJECTDIR}/spaceteam_spi.o ${OBJECTDIR}/spaceteam_rfid.o ${OBJECTDIR}/spaceteam_wireless.o
+OBJECTFILES=${OBJECTDIR}/spaceteam_main.o ${OBJECTDIR}/spaceteam_io.o ${OBJECTDIR}/spaceteam_display.o ${OBJECTDIR}/spaceteam_spi.o ${OBJECTDIR}/spaceteam_rfid.o ${OBJECTDIR}/spaceteam_wireless.o ${OBJECTDIR}/spaceteam_game.o ${OBJECTDIR}/spaceteam_msg.o
 
 # Source Files
-SOURCEFILES=spaceteam_main.c spaceteam_io.c spaceteam_display.c spaceteam_spi.c spaceteam_rfid.c spaceteam_wireless.c
+SOURCEFILES=spaceteam_main.c spaceteam_io.c spaceteam_display.c spaceteam_spi.c spaceteam_rfid.c spaceteam_wireless.c spaceteam_game.c spaceteam_msg.c
 
 
 CFLAGS=
@@ -121,6 +121,20 @@ ${OBJECTDIR}/spaceteam_wireless.o: spaceteam_wireless.c  nbproject/Makefile-${CN
 	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_wireless.c  -o ${OBJECTDIR}/spaceteam_wireless.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_wireless.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
 	@${FIXDEPS} "${OBJECTDIR}/spaceteam_wireless.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/spaceteam_game.o: spaceteam_game.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/spaceteam_game.o.d 
+	@${RM} ${OBJECTDIR}/spaceteam_game.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_game.c  -o ${OBJECTDIR}/spaceteam_game.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_game.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/spaceteam_game.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/spaceteam_msg.o: spaceteam_msg.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/spaceteam_msg.o.d 
+	@${RM} ${OBJECTDIR}/spaceteam_msg.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_msg.c  -o ${OBJECTDIR}/spaceteam_msg.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_msg.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1  -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/spaceteam_msg.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/spaceteam_main.o: spaceteam_main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
@@ -163,6 +177,20 @@ ${OBJECTDIR}/spaceteam_wireless.o: spaceteam_wireless.c  nbproject/Makefile-${CN
 	@${RM} ${OBJECTDIR}/spaceteam_wireless.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_wireless.c  -o ${OBJECTDIR}/spaceteam_wireless.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_wireless.o.d"      -g -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
 	@${FIXDEPS} "${OBJECTDIR}/spaceteam_wireless.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/spaceteam_game.o: spaceteam_game.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/spaceteam_game.o.d 
+	@${RM} ${OBJECTDIR}/spaceteam_game.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_game.c  -o ${OBJECTDIR}/spaceteam_game.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_game.o.d"      -g -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/spaceteam_game.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/spaceteam_msg.o: spaceteam_msg.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/spaceteam_msg.o.d 
+	@${RM} ${OBJECTDIR}/spaceteam_msg.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  spaceteam_msg.c  -o ${OBJECTDIR}/spaceteam_msg.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/spaceteam_msg.o.d"      -g -omf=elf -O0 -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/spaceteam_msg.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 

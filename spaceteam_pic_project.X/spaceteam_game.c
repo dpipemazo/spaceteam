@@ -6,6 +6,8 @@
 #include "spaceteam_game.h"
 #include "spaceteam_io.h"
 #include "spaceteam_rfid.h"
+#include "spaceteam_msg.h"
+#include "spaceteam_display.h"
 
 // Random number generator value
 unsigned lfsr;
@@ -17,10 +19,13 @@ game_state_t game_state;
 unsigned char req_time;
 // LED which is currently being multiplexed
 unsigned char curr_LED;
+// The game health
+unsigned char game_health;
 
 // Active requests array
-spaceteam_request_t active_requests[MAX_MUM_PLAYERS];
-// Our current request
+spaceteam_request_t active_requests[MAX_NUM_PLAYERS];
+// Our request
+spaceteam_request_t my_req;
 
 // Buffer which holds keypresses
 unsigned char key_buf[MAX_KEYPRESSES];
@@ -28,27 +33,27 @@ unsigned char key_buf[MAX_KEYPRESSES];
 // Table of possible RFID tokens
 unsigned char rfid_tokens[NUM_RFID_TOKENS][RFID_BYTES_PER_TOKEN] =
 	{
-		0x00, 0x00, 0x00, 0x00, // Token 1
-		0x00, 0x00, 0x00, 0x00, // Token 2
-		0x00, 0x00, 0x00, 0x00, // Token 3
-		0x00, 0x00, 0x00, 0x00, // Token 4
-		0x00, 0x00, 0x00, 0x00, // Token 5
-		0x00, 0x00, 0x00, 0x00, // Token 6
-		0x00, 0x00, 0x00, 0x00, // Token 7
-		0x00, 0x00, 0x00, 0x00, // Token 8
-		0x00, 0x00, 0x00, 0x00, // Token 9
-		0x00, 0x00, 0x00, 0x00, // Token 10
-		0x00, 0x00, 0x00, 0x00, // Token 11
-		0x00, 0x00, 0x00, 0x00, // Token 12
-		0x00, 0x00, 0x00, 0x00, // Token 13
-		0x00, 0x00, 0x00, 0x00, // Token 14
-		0x00, 0x00, 0x00, 0x00, // Token 15
-		0x00, 0x00, 0x00, 0x00, // Token 16
+		{0x00, 0x00, 0x00, 0x00}, // Token 1
+		{0x00, 0x00, 0x00, 0x00}, // Token 2
+		{0x00, 0x00, 0x00, 0x00}, // Token 3
+		{0x00, 0x00, 0x00, 0x00}, // Token 4
+		{0x00, 0x00, 0x00, 0x00}, // Token 5
+		{0x00, 0x00, 0x00, 0x00}, // Token 6
+		{0x00, 0x00, 0x00, 0x00}, // Token 7
+		{0x00, 0x00, 0x00, 0x00}, // Token 8
+		{0x00, 0x00, 0x00, 0x00}, // Token 9
+		{0x00, 0x00, 0x00, 0x00}, // Token 10
+		{0x00, 0x00, 0x00, 0x00}, // Token 11
+		{0x00, 0x00, 0x00, 0x00}, // Token 12
+		{0x00, 0x00, 0x00, 0x00}, // Token 13
+		{0x00, 0x00, 0x00, 0x00}, // Token 14
+		{0x00, 0x00, 0x00, 0x00}, // Token 15
+		{0x00, 0x00, 0x00, 0x00} // Token 16
 	};
 
 // Table of LSEL values based off of request type. This is only applicable for
 //	switch type requests
-unsigned char lsel_vals[NO_REQ] = 
+unsigned char isel_vals[NO_REQ] = 
 	{
 		0xFF, // Keypad doesn't need a LSEL value
 		0xFF, // RFID doesn't need a LSEL value
@@ -60,11 +65,11 @@ unsigned char lsel_vals[NO_REQ] =
 		3, 	  // Toggle2 = S3
 		9,    // Toggle3 = S8
 		12,   // Toggle4 = S11
-		0xFF  // Knob doesn't need a LSEL value
+		0xFF, // Knob doesn't need a LSEL value
 		14,   // Tilt = S6
-		10	  // IR = U1
-		1, 	  // Reed = S7
-	}
+		10,	  // IR = U1
+		1 	  // Reed = S7
+	};
 
 
 // Initialize the game. 
@@ -86,6 +91,24 @@ void init_game(void)
 	{
 		key_buf[i] = 0;
 	}
+
+	// Initialize the IO
+	init_io();
+
+	// Initialize the display
+	init_display();
+
+	// Initialize the RFID
+	init_rfid();
+
+	// Initialize the wireless
+	//	commented out for now until we veryify that the game works on one board
+	// init_wireless();
+
+	// Initialize the timers
+	init_timer_1();
+	init_timer_2();
+
 }
 
 // Begin the game
@@ -100,6 +123,12 @@ void begin_game(unsigned short num_boards)
 
 	// Start the game state
 	game_state = GAME_STARTED;
+
+	// Set the game health
+	game_health = GAME_HEALTH_MAX;
+
+	// And generate our new request
+	generate_request();
 }
 
 // The LFSR which will act as a pseudo-random number generator. This will
@@ -122,50 +151,56 @@ unsigned lfsr_get_random(void)
 void generate_request(void)
 {
 	unsigned rand_val;
-	static spaceteam_request_t req;
 
 	// Generate the random board number, request type and request value 
 	//	for the request
 	rand_val = lfsr_get_random();
-	req.board = rand_val % num_boards;
+	my_req.board = rand_val % MAX_NUM_PLAYERS;
 
 	// Generate the request type
 	rand_val = lfsr_get_random();
-	req.type = rand_val % NUM_REQS;
+	my_req.type = rand_val % NO_REQ;
 
 	// Generate the request value
 	rand_val = lfsr_get_random();
 	// Need to get the value based off of the request type
-	switch(req_type)
+	switch(my_req.type)
 	{
 		case KEYPAD_REQ:
-			req.val = rand_val % NUM_KEYPAD_VALS;
+			my_req.val = rand_val % NUM_KEYPAD_VALS;
 			break;
 		case KNOB_REQ:
-			req.val = rand_val % NUM_KNOB_VALS;
+			my_req.val = rand_val % NUM_KNOB_VALS;
 			break;
 		case RFID_REQ:
-			req.val = rand_Val % (num_boards * 2);
+			my_req.val = rand_val % NUM_RFID_REQS;
 			break;
 		default:
-			req.val = rand_val % NUM_SWITCH_VALS;
+			my_req.val = rand_val % NUM_SWITCH_VALS;
 			break;
 	}
 
+	//
+	// Should probably display the request to the user 
+	//	in here somewhere
+	//
+
 	// Send a message issuing the request
-	send_message(MSG_NEW_REQ, &req);
+	send_message(MSG_NEW_REQ, my_req.type, my_req.board, my_req.val);
 
 	// Reset the request time
 	req_time = REQ_TIME_MAX;
+
 	// Reset the timer counter
 	TMR1 = 0;
+
 	// And turn on the request timer interrupts
 	TIMER_1_INT_ENABLE = 1;
 
 }
 
 // Register a new request which we receive
-void register_request(rfid_type_t type, unsigned char board, unsigned val)
+void register_request(spaceteam_req_t type, unsigned char board, unsigned val)
 {
 	int i;
 	// Copy the request into our active requests array at the 
@@ -184,7 +219,7 @@ void register_request(rfid_type_t type, unsigned char board, unsigned val)
 }
 
 // Deregister a request that we had gotten
-void deregister_request(unsigned char board)
+void deregister_request(spaceteam_req_t type, unsigned char board, unsigned val)
 {
 	int i;
 
@@ -192,10 +227,8 @@ void deregister_request(unsigned char board)
 	//	take out this one since we no longer need it
 	for (i = 0; i < MAX_NUM_PLAYERS; i++)
 	{
-		// We just need to look at the board who issued
-		//	the request for a match, since each board
-		//	can only have one pending request 
-		if (active_requests[i].board == board)
+		// Match on all categories for good measure
+		if ( (active_requests[i].board == board) && (active_requests[i].type == type) && (active_requests[i].val == val) )
 		{
 			// 'Free' up the slot by changing the type 
 			//	to no request
@@ -242,75 +275,127 @@ void init_timer_1(void)
 //	value by 1
 void _ISR _T1Interrupt(void)
 {
-	// Decrease the request time by 1
-	req_time -= 1;
-
-	// If we timed out
-	if (req_time == 0)
+	if (game_state == GAME_STARTED)
 	{
-		// Turn off timer interrupts until we generate a new request
-		TIMER_1_INT_ENABLE = 0;
+		// Decrease the request time by 1
+		req_time -= 1;
 
-		// Send a message that our request failed
-		send_message(MSG_REQ_FAILED);
+		// If we timed out
+		if (req_time == 0)
+		{
+			// Turn off timer interrupts until we generate a new request
+			TIMER_1_INT_ENABLE = 0;
 
-		// And generate a new request
-		generate_request();
+			// Send a message that our request failed
+			send_message(MSG_REQ_FAILED, my_req.type, my_req.board, my_req.val);
+
+			// And generate a new request
+			generate_request();
+		}
 	}
+
+	// Need to clear the interrupt flag
+	IFS0bits.T1IF = 0;
+
 }
 
-// Set up timer 3 as a 1KHz interrupt which will do all of our polling and will
+// Set up timer 2 as a 1KHz interrupt which will do all of our polling and will
 //	multiplex the LEDs
-void init_timer_3(void)
+void init_timer_2(void)
 {
-	// Set the prescaler value to the required val for 1KHz
-	PR3 = TIMER_3_1KHz;
+	// Set the counter value to the required val for 1KHz
+	PR2 = TIMER_2_1KHz;
+
 	// Clear the timer's count register
 	TMR3 = 0;
 
 	// Set interrupt priority lower than that of wireless (7) and the 
 	//	game health timer (6)
-	TIMER_1_PRIORITY = 5;
+	TIMER_2_PRIORITY = 5;
+
 	// Turn on interrupts
-	TIMER_1_INT_ENABLE = 1;
+	TIMER_2_INT_ENABLE = 1;
 
 	// Turn on the timer and the prescaler
-	T3CON = (TIMER_3_ON | TIMER_3_PRESCALE_8);
+	T3CON = (TIMER_2_ON | TIMER_2_POSTSCALE_16 | TIMER_2_PRESCALE_16);
 }
 
-// This is the timer 3 interrupt. When we are in this interrupt handler, we need 
+// This function checks to see if the begin button has been debounced
+int is_begin_debounced(void)
+{
+	static char db_val = IO_DEBOUNCE_COUNT;
+	int ret_val = 0;
+
+	// Set LSEL for the begin button
+	set_lsel(BEGIN_LSEL_VAL);
+
+	// If the button is pressed (active low)
+	if (get_iomux() == 0)
+	{
+		db_val -= 1;
+	}
+
+	// If db_val has reached zero, then we return 1 and reset it
+	if (db_val == 0)
+	{
+		ret_val = 1;
+		db_val = IO_DEBOUNCE_COUNT;
+	}
+
+	return ret_val;
+}
+
+// This is the timer 2 interrupt. When we are in this interrupt handler, we need 
 //	to check our active requests list and check the I/O for which there is a request. 
 //	If the request has been fulfilled, send off a message saying so.
-void _ISR _T1Interrupt(void)
+void _ISR _T2Interrupt(void)
 {
 	int i;
-	unsigned val;
 
-	//
-	// Check all of our active requests
-	//
-	for (i = 0; i < MAX_NUM_PLAYERS; i++)
+	// If we are playing the game, we need to see if we have
+	//	completed any of our pending requests
+	if (game_state == GAME_STARTED)
 	{
-		// See if there is a request pending in the slot
-		if(active_requests[i].type != NO_REQ)
+		//
+		// Check all of our active requests
+		//
+		for (i = 0; i < MAX_NUM_PLAYERS; i++)
 		{
-			// Call the function which gets the current value for the request
-			if (check_request_completed(i))
+			// See if there is a request pending in the slot
+			if(active_requests[i].type != NO_REQ)
 			{
-				// Send a message saying that the resuest has been completed
-				send_message(MSG_REQ_COMPLETED, active_requests[i].board);
+				// Call the function which gets the current value for the request
+				if (check_request_completed(i))
+				{
+					// Send a message saying that the resuest has been completed
+					send_message(MSG_REQ_COMPLETED, active_requests[i].type, active_requests[i].board, active_requests[i].val);
 
-				// Reallocate the message
-				active_requests[i].type = NO_REQ; 
+					// Reallocate the message
+					active_requests[i].type = NO_REQ; 
+				}
 			}
+		}
+
+		// Multiplex the LEDs
+		multiplex_leds();
+
+		// Debounce a row of the keypad and put the result into the key buffer
+		update_key_buf();
+	}
+	// Otherwise, we need to look for the begin button being pressed to 
+	//	transition from the end of the game to something more usefun
+	else
+	{
+		// If the begin button is debounced
+		if(is_begin_debounced())
+		{
+			// Then start the game!
+			begin_game(1);
 		}
 	}
 
-	// Multiplex the LEDs
-	multiplex_leds();
-
-	// Debounce a row of the keypad and put the result into the key buffer
-	update_keybuf();
+	// Need to clear the interrupt Flag
+	IFS0bits.T2IF = 0;
 
 }
 
@@ -318,7 +403,7 @@ void _ISR _T1Interrupt(void)
 //	It will check to see if the request is completed by determining the 
 //	type of request and then monitoring the I/O for the request if necessary. 
 //	It will also perform debouncing 
-int check_request_completed(req_no)
+int check_request_completed(int req_no)
 {
 	int ret_val = 0;
 
@@ -422,6 +507,7 @@ int check_switch_completed(int req_no)
 int check_knob_completed(unsigned val)
 {
 	unsigned adc_val;
+	int ret_val;
 
 	// Get the raw sample
 	adc_val = get_knob_sample();
@@ -430,7 +516,7 @@ int check_knob_completed(unsigned val)
 
 	if (adc_val == val)
 	{
-		ret_val == 1
+		ret_val = 1;
 	}
 
 	return ret_val;
@@ -442,7 +528,7 @@ int check_knob_completed(unsigned val)
 //	increments one LED every call, and if the 
 //  LED should be on, it changes the select line to turn it 
 //	on. Else, it doesn't moce the LSEL.
-void multiplex_LEDs(void)
+void multiplex_leds(void)
 {
 	// If our LED should be on 
 	if ( (curr_LED < req_time) || ( (curr_LED >= MIN_HEALTH_LED) && (curr_LED < (game_health + MIN_HEALTH_LED)) ) )
