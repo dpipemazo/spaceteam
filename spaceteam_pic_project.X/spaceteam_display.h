@@ -47,15 +47,16 @@ extern "C" {
 // Function declarations
 void init_display(void);
 void display_set_control_sigs(unsigned data);
-void display_write_command(unsigned short data);
-void display_write_char(unsigned short data);
+void display_write_command(unsigned char data);
+void display_write_char(unsigned char data);
 void display_reset(void);
 void display_write_string(char *str_to_write);
-void display_set_address(unsigned short address);
-void display_write_line(unsigned short line, char * str);
+void display_set_address(unsigned char address);
+void display_write_line(unsigned char line, char * str);
 void display_clear(void);
-void display_write_hex(unsigned data, unsigned short line, unsigned short idx);
+void display_write_hex(unsigned data, unsigned char line, unsigned char idx);
 void hex_to_string(unsigned data, char * out_str);
+void display_write_debug(char * data, unsigned char line, unsigned char len);
 
 #ifdef	__cplusplus
 }

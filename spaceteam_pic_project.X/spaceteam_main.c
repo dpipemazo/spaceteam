@@ -67,7 +67,7 @@ int main(void) {
     rfid_status_t status;
     char rfid_id[10];
     char payload[wl_module_PAYLOAD_LEN] = "Hello World!";
-    char address[wl_module_ADDR_LEN] = {0xDE, 0xAD, 0xBE, 0xEF, 0xAC};
+    unsigned char address[wl_module_ADDR_LEN] = {0x12, 0x34, 0x56, 0x78, 0x9A};
     char curr_addr[wl_module_ADDR_LEN];
 
     // Initialize the data to make sure we're getting something
@@ -91,12 +91,10 @@ int main(void) {
     // Initialize the wireless to the address given
     init_wireless(address);
 
-    wl_module_read_register(TX_ADDR, curr_addr, wl_module_ADDR_LEN);
-
     // If we are the master, then we need to send a packet
     #ifdef WIRELESS_MASTER
         // Send a single packet, and see how it goes
-        wl_module_send_payload(payload);
+        wl_module_send_payload(payload, address);
     #endif
 
     // Loop doing some sort of test
@@ -110,7 +108,7 @@ int main(void) {
       {
         set_lsel(i);
         // Read the config register and see what's up
-        __delay_ms(500);
+        __delay_ms(1000);
       }
 
       //

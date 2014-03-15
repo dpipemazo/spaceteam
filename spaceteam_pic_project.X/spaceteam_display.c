@@ -46,7 +46,7 @@ void display_set_control_sigs(unsigned data)
 }
 
 // This function writes a control command to the display
-void display_write_command(unsigned short data)
+void display_write_command(unsigned char data)
 {
 
 	// Write the data to the shift register over the SPI connection. 
@@ -82,7 +82,7 @@ void display_write_command(unsigned short data)
 // This function writes a data byte to the display. It currently does nothing
 //	about the display cursor position. Eventually we will get fancier functions
 //	for this kind of thing
-void display_write_char(unsigned short data)
+void display_write_char(unsigned char data)
 {
 	// Write the data to the shift register over the SPI connection. 
 	//	NOTE: The SPI clock is running at 1/2 of the system clock, 
@@ -149,7 +149,7 @@ void hex_to_string(unsigned data, char * out_str)
 // This function writes an unsigned number to the display as hexadecimal.
 // It will display it beginning at the line and inxed indicated. 
 // Line should be 0/1 and idx should be [0, 15]
-void display_write_hex(unsigned data, unsigned short line, unsigned short idx)
+void display_write_hex(unsigned data, unsigned char line, unsigned char idx)
 {
 	char disp_str[5];
 
@@ -223,7 +223,7 @@ void display_write_string(char *str_to_write)
 // This function sets the display RAM address to the passed
 //	address. Line 1 begins at 0x00, Line 2 begins at 0x40. 
 //	Both lines go for 16 characters.
-void display_set_address(unsigned short address)
+void display_set_address(unsigned char address)
 {
 	display_write_command(DISPLAY_ADDRESS_DATA | address);
 
@@ -233,7 +233,7 @@ void display_set_address(unsigned short address)
 // Write up to 16 characters on a line of the display. 
 //	If line == 0 then the first line is written, else 
 //	the second line
-void display_write_line(unsigned short line, char * str)
+void display_write_line(unsigned char line, char * str)
 {
 	if (line == 0)
 	{
@@ -254,5 +254,48 @@ void display_clear(void)
 	// Send the clear and wait a bit
 	display_write_command(DISPLAY_CLEAR_DATA);
 	__delay_ms(2);
+}
+
+void display_write_debug(char * data, unsigned char line, unsigned char len)
+{
+	unsigned char val, digit;
+	int i;
+	char disp_str[3] = "XX";
+
+	if (line == 0)
+	{
+		display_set_address(DISPLAY_LINE_1_START);
+	}
+	else
+	{
+		display_set_address(DISPLAY_LINE_2_START);
+	}
+
+	for(i = 0; i < len; i++)
+	{
+		val = data[i];
+		digit = val / 16;
+		if( digit < 10)
+		{
+			disp_str[0] = digit + '0';
+		}
+		else
+		{
+			disp_str[0] = digit + ('A' - 10);
+		}
+		digit = val % 16;
+				if( digit < 10)
+		{
+			disp_str[1] = digit + '0';
+		}
+		else
+		{
+			disp_str[1] = digit + ('A' - 10);
+		}
+
+		display_write_string(disp_str);
+
+	}
+
 }
 

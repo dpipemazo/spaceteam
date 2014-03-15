@@ -76,13 +76,13 @@
 void init_wireless(unsigned char * address);
 void wl_module_set_address(unsigned char * address);
 unsigned char wl_module_get_status(void);
-void wl_module_send_command(unsigned char command, unsigned char * data, unsigned char data_len);
+void wl_module_send_command(unsigned char command, unsigned char * datain, unsigned char * dataout, unsigned char data_len);
 void wl_module_read_register(unsigned char reg, unsigned char * value, unsigned char len);
 unsigned char wl_module_read_register_byte(unsigned char reg);
 void wl_module_write_register(unsigned char reg, unsigned char * value, unsigned char len);
 void wl_module_write_register_byte(unsigned char reg, unsigned char value);
 void wl_module_get_payload(unsigned char * pload);
-void wl_module_send_payload(unsigned char * pload);
+void wl_module_send_payload(unsigned char * pload, unsigned char * address);
 void wl_module_start_transmit(void);
 
 #endif /* _WL_MODULE_H_ */

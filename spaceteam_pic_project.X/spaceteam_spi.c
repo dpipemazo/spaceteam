@@ -63,8 +63,18 @@ unsigned char spi_write(unsigned char data)
     // Do a SPI write for all of the data in the buffer
     for( i = 0; i < length; i++)
     {
-        // Do the SPI write
-        temp_val = spi_write(datain[i]);
+        // Do the SPI write, if we have data to write
+        if (datain != NULL)
+        {
+            temp_val = spi_write(datain[i]);
+        }
+        // Or, we may be trying to do a read, in which case
+        //  just send zeroes
+        else
+        {
+            temp_val = spi_write(0);
+        }
+        
         // And write the return value to the output buffer if
         //  the pointer is non-NULL
         if (dataout != NULL)
