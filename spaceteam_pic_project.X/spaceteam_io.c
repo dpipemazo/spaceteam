@@ -105,7 +105,7 @@ void set_lsel(unsigned val)
 // Use this function to get the value of IO mux
 unsigned get_iomux(void)
 {
-	return (IOIN_PORT != 0);
+	return IOIN_PORT;
 }
 
 void init_keypad(void)

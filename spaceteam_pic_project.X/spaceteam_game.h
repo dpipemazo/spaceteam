@@ -8,22 +8,34 @@
 // The maximum number of players
 #define MAX_NUM_PLAYERS	8
 
+// The maximum number of keys which can be entered
+#define MAX_KEYPRESSES  4
+
+// The number of possible RFID tokens
+#define NUM_RFID_TOKENS 16
+#define RFID_BYTES_PER_TOKEN 4
+
+// The maximum ADC range
+#define MAX_ADC_RANGE 10
+#define MAX_ADC_VAL 0x0400
+#define ADC_RANGE_DIVIDER (MAX_ADC_VAL / MAX_ADC_RANGE)
+
 // The types of requests which the game can make
 typedef enum _req_type_t
 {
 	KEYPAD_REQ,
 	RFID_REQ,
-	PB1_REQ,
-	PB2_REQ,
-	PB3_REQ,
-	PB4_REQ,
-	TOGGLE1_REQ,
-	TOGGLE2_REQ,
-	TOGGLE3_REQ,
-	TOGGLE4_REQ,
-	KNOB_REQ,
-	TILT_REQ,
-	IR_REQ,
+	PB1_REQ, // S1
+	PB2_REQ, // S4
+	PB3_REQ, // S9
+	PB4_REQ, // S10
+	TOGGLE1_REQ, // S2
+	TOGGLE2_REQ, // S3
+	TOGGLE3_REQ, // S8
+	TOGGLE4_REQ, // S11
+	KNOB_REQ, 
+	TILT_REQ, // S6
+	IR_REQ,   // U1
 	REED_REQ,
 	NO_REQ		// This should always be last
 } req_type_t;
@@ -57,6 +69,14 @@ typedef struct _spaceteam_request
 // Request time value
 #define REQ_TIME_MAX			8
 
+// Number of timer interruprs (1KHz to wait before debouncing)
+#define IO_DEBOUNCE_COUNT 		25
+
+// Values for multiplexing the LEDs
+#define MIN_HEALTH_LED			8rfid
+
+
+
 // Different states that the game can be in
 typedef enum _game_state_t
 {
@@ -76,5 +96,27 @@ typedef enum _game_msg_t
 	MSG_NETWORKING,
 	NUM_MSGS
 } game_msg_t;
+
+//
+// Function declarations
+//
+void init_game(void);
+void begin_game(unsigned short num_boards);
+unsigned lfsr_get_random(void);
+void generate_request(void);
+void register_request(rfid_type_t type, unsigned char board, unsigned val);
+void deregister_request(unsigned char board);
+void request_done(void);
+void init_timer_1(void);
+void _ISR _T1Interrupt(void);
+void init_timer_3(void);
+void _ISR _T1Interrupt(void);
+int check_request_completed(req_no);
+int check_keypad_completed(unsigned val);
+int check_rfid_completed(unsigned val);
+int check_switch_completed(int req_no);
+int check_knob_completed(unsigned val);
+void multiplex_LEDs(void);
+void update_key_buf(void);
 
 #endif /* SPACETEAM_GAME_H_ */
