@@ -12,7 +12,7 @@
 //	keep everything local
 void send_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char board, unsigned val )
 {
-	char req_str[16] = "rXXXXbXXXXvXXXX";
+	char req_str[16];
 
 	switch(msg)
 	{
@@ -22,12 +22,15 @@ void send_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char board,
 			register_request(req, board, val);
 
 			// Compile the request to display
+			req_str[0] = 'r';
 			hex_to_string(req, &req_str[1]);
+			req_str[5] = 'b';
 			hex_to_string(board, &req_str[6]);
-			hex_to_string(val, req_str);
+			req_str[10] = 'v';
+			hex_to_string(val, &req_str[11]);
 
 			// And display it
-			display_write_line(0, &req_str[11]);
+			display_write_line(0, req_str);
 			break;
 		case MSG_REQ_COMPLETED:
 			display_write_line(1, "Req Completed!");

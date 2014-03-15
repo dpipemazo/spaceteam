@@ -60,6 +60,7 @@ typedef struct _spaceteam_request
 #define TIMER_1_PRESCALE_256 	0x0030
 #define TIMER_1_INT_ENABLE 		IEC0bits.T1IE
 #define TIMER_1_PRIORITY		IPC0bits.T1IP
+#define TIMER_1_INT_FLAG		IFS0bits.T1IF
 
 #define TIMER_2_ON 				0x0004
 #define TIMER_2_POSTSCALE_16	0x0078
@@ -67,6 +68,7 @@ typedef struct _spaceteam_request
 #define TIMER_2_1KHz			32
 #define TIMER_2_INT_ENABLE 		IEC0bits.T2IE
 #define TIMER_2_PRIORITY		IPC1bits.T2IP
+#define TIMER_2_INT_FLAG		IFS0bits.T2IF
 
 // Request time value
 #define REQ_TIME_MAX			8

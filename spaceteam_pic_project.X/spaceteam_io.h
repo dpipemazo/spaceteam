@@ -77,7 +77,7 @@ extern "C" {
 #define TRISAVAL ( IOIN_INPUT | WIRELESS_IRQ_INPUT )
 
 // Update this when not debugging
-#define TRISBVAL ( TRISB_DEBUG | SPI_MISO_INPUT | KNOB_INPUT )
+#define TRISBVAL ( SPI_MISO_INPUT | KNOB_INPUT )
 
 
 // Kepyad constants

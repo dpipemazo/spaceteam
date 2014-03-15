@@ -7,6 +7,7 @@
 
 #include "xc.h"
 #include "spaceteam_game.h"
+#include "spaceteam_display.h"
 
 //
 // Define the clock frequency
@@ -58,6 +59,8 @@
 
 int main(void) {
     
+    unsigned count;
+
     // Want to initialize the game
     init_game();
 
@@ -66,6 +69,7 @@ int main(void) {
         // Everything should be done in interrupts.... so 
         //  we can theoretically just NOP in here unless
         //  we have something better to do
+        count++;
     }
 
     return 0;

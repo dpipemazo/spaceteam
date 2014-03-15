@@ -260,7 +260,11 @@ void init_timer_1(void)
 
 	// Set interrupt priority lower than that of wireless which is 7
 	TIMER_1_PRIORITY = 6;
-	// Turn off interrupts for not
+
+	// Turn off the timer 1 interrupt flag
+	TIMER_1_INT_FLAG = 0;
+
+	// Turn off interrupts for now
 	TIMER_1_INT_ENABLE = 0;
 
 	// Turn the timer on, based off of the internal oscillator and 
@@ -295,7 +299,7 @@ void _ISR _T1Interrupt(void)
 	}
 
 	// Need to clear the interrupt flag
-	IFS0bits.T1IF = 0;
+	TIMER_1_INT_FLAG = 0;
 
 }
 
@@ -307,32 +311,39 @@ void init_timer_2(void)
 	PR2 = TIMER_2_1KHz;
 
 	// Clear the timer's count register
-	TMR3 = 0;
+	TMR2 = 0;
 
 	// Set interrupt priority lower than that of wireless (7) and the 
 	//	game health timer (6)
 	TIMER_2_PRIORITY = 5;
 
+	// Need to clear the interrupt flag
+	TIMER_2_INT_FLAG = 0;
+
 	// Turn on interrupts
 	TIMER_2_INT_ENABLE = 1;
 
 	// Turn on the timer and the prescaler
-	T3CON = (TIMER_2_ON | TIMER_2_POSTSCALE_16 | TIMER_2_PRESCALE_16);
+	T2CON = (TIMER_2_ON | TIMER_2_POSTSCALE_16 | TIMER_2_PRESCALE_16);
 }
 
 // This function checks to see if the begin button has been debounced
 int is_begin_debounced(void)
 {
-	static char db_val = IO_DEBOUNCE_COUNT;
+	static char db_val;
 	int ret_val = 0;
 
 	// Set LSEL for the begin button
-	set_lsel(BEGIN_LSEL_VAL);
+	set_isel(BEGIN_LSEL_VAL);
 
 	// If the button is pressed (active low)
 	if (get_iomux() == 0)
 	{
 		db_val -= 1;
+	}
+	else
+	{
+		db_val = IO_DEBOUNCE_COUNT;
 	}
 
 	// If db_val has reached zero, then we return 1 and reset it
@@ -395,7 +406,7 @@ void _ISR _T2Interrupt(void)
 	}
 
 	// Need to clear the interrupt Flag
-	IFS0bits.T2IF = 0;
+	TIMER_2_INT_FLAG = 0;
 
 }
 
