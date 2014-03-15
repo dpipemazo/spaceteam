@@ -28,6 +28,8 @@
 
 
 */
+#ifndef NRF24L01_H
+#define NRF24L01_H
 
 //Memory Map - register address defines
 #define CONFIG      0x00
@@ -306,3 +308,5 @@
 #define FIFO_STATUS_TX_EMPTY	0x10
 #define FIFO_STATUS_RX_FULL		0x02
 #define FIFO_STATUS_RX_EMPTY	0x01
+
+#endif

@@ -41,7 +41,7 @@
 
 // Flag which denotes transmitting mode
 volatile unsigned char PTX;
-volatile char pload_data[wl_module_PAYLOAD];
+unsigned char pload_data[wl_module_PAYLOAD_LEN];
 
 
 //
@@ -51,8 +51,6 @@ volatile char pload_data[wl_module_PAYLOAD];
 //
 void init_wireless(unsigned char * address)
 {
-	unsigned char status;
-
     // Define CSN and CE as Output and set them to default
     wl_module_CE_lo;
     wl_module_CSN_hi;
@@ -68,34 +66,17 @@ void init_wireless(unsigned char * address)
 	wl_module_send_command(FLUSH_TX, NULL, 0);
 
     // Clear all pending interrupts for the wireless controller
-    wl_module_config_register(STATUS, 0x70);
+    wl_module_write_register_byte(STATUS, 0x70);
 
     // Set RF channel
-    wl_module_config_register(RF_CH,wl_module_CH);
+    wl_module_write_register_byte(RF_CH, wl_module_CH);
 	// Set data speed & Output Power configured in wl_module.h
-	wl_module_config_register(RF_SETUP,wl_module_RF_SETUP);
-	// Set length of incoming payload
-    wl_module_config_register(RX_PW_P0, wl_module_PAYLOAD);
+	wl_module_write_register_byte(RF_SETUP, wl_module_RF_SETUP);
     // Set up the chip address
-    wl_module_set_address(address);
-    // Setup retries
-	wl_module_config_register(SETUP_RETR,(SETUP_RETR_ARD_750 | SETUP_RETR_ARC_15));
+    // wl_module_set_address(address);
 
 	// Clear the shared variable for monitoring retries
 	PTX = 0;
-
-	//
-	// Either start the transmitter or receiver, based on master/slave 
-	//
-	#ifdef WIRELESS_MASTER
-		// Want to start up the transmitter
-		TX_POWERUP;
-	#else
-		// Want to start up the receiver
-		RX_POWERUP;
-		// And send the chip enable high to begin listening for packets
-		wl_module_CE_hi;
-	#endif
 
     // 
     // Set up interrupts on the PIC 
@@ -104,6 +85,30 @@ void init_wireless(unsigned char * address)
     IFS1bits.INT2IF = 0;	// Clear the interrupt flag, if it was set.
     INTCON2bits.INT2EP = 1; // Falling edge
     IEC1bits.INT2IE = 1;	// Enable interrupt 2
+
+   	//
+	// Either start the transmitter or receiver, based on master/slave 
+	//
+	#ifdef WIRELESS_MASTER
+		//Config the CONFIG Register (Mask IRQ, CRC, etc)
+		wl_module_write_register_byte(CONFIG, wl_module_CONFIG);
+
+		// Setup retries
+		wl_module_write_register_byte(SETUP_RETR, (SETUP_RETR_ARD_750 | SETUP_RETR_ARC_15));
+
+		// Want to start up the transmitter
+		TX_POWERUP;
+	#else
+		// Set length of incoming payload
+    	wl_module_write_register_byte(RX_PW_P0, wl_module_PAYLOAD_LEN);
+		// Want to start up the receiver
+		RX_POWERUP;
+		// And send the chip enable high to begin listening for packets
+		wl_module_CE_hi;
+	#endif
+
+	// Give it a bit to power up
+	__delay_ms(50);
 }
 
 // Set the TX and RX address for the module on data pipe 0
@@ -138,8 +143,6 @@ unsigned char wl_module_get_status(void)
 //	make the length 0
 void wl_module_send_command(unsigned char command, unsigned char * data, unsigned char data_len)
 {
-	unsigned char status;
-
 	// Send the chip select low
 	wl_module_CSN_lo;
 	// Write the command byte
@@ -166,6 +169,18 @@ void wl_module_read_register(unsigned char reg, unsigned char * value, unsigned 
     wl_module_send_command( (R_REGISTER | (REGISTER_MASK & reg)), value, len );
 }
 
+// Read just one byte from a register
+unsigned char wl_module_read_register_byte(unsigned char reg)
+// Reads an array of bytes from the given start position in the wl-module registers.
+{
+	unsigned char reg_val;
+
+	// Send the command to read the bytes
+    wl_module_read_register(reg, &reg_val, 1 );
+
+    return reg_val;
+}
+
 // Write a number of bytes to a wireless register
 void wl_module_write_register(unsigned char reg, unsigned char * value, unsigned char len)
 // Writes an array of bytes into inte the wl-module registers.
@@ -174,20 +189,30 @@ void wl_module_write_register(unsigned char reg, unsigned char * value, unsigned
     wl_module_send_command( (W_REGISTER | (REGISTER_MASK & reg)), value, len );
 }
 
+// Write just one byte to a register
+void wl_module_write_register_byte(unsigned char reg, unsigned char value)
+{
+	unsigned char reg_val;
+
+	reg_val = value;
+	wl_module_write_register(reg, &reg_val, 1);
+}
+
 // Read the payload from the RX FIFO
-void wl_module_get_payload(unsigned char * pload, unsigned char pload_len)
+void wl_module_get_payload(unsigned char * pload)
 // Reads pload_len bytes from the RX fifo into the data array
 {
     // Send the command to read the RX payload
-    wl_module_send_command( R_RX_PLOAD, pload , pload_len );
+    wl_module_send_command( R_RX_PAYLOAD, pload , wl_module_PAYLOAD_LEN );
 
 }
 
-void wl_module_send_payload(unsigned char * pload, unsigned char pload_len)
+// Send the payload out
+void wl_module_send_payload(unsigned char * pload)
 // Sends a data package to the default address. Be sure to send the correct
 // amount of bytes as configured as payload on the receiver.
 {
-    while (PTX) {}                  	// Wait until last paket is sent
+    while (PTX) {}                  	// Wait until last packet is sent
 
     wl_module_CE_lo;					// Send the chip enable low
 
@@ -198,7 +223,7 @@ void wl_module_send_payload(unsigned char * pload, unsigned char pload_len)
     wl_module_send_command(FLUSH_TX, NULL, 0); 		  
 
     // SEnd the command to write the payload
-    wl_module_send_command(W_TX_PAYLOAD, pload, pload_len);
+    wl_module_send_command(W_TX_PAYLOAD, pload, wl_module_PAYLOAD_LEN);
 
     // And start the transmit
     wl_module_start_transmit();
@@ -229,20 +254,20 @@ void _ISR _INT2Interrupt(void)
 
     if (status & (1<<TX_DS)){ // IRQ: Package has been sent
     	display_write_line(1, "PACKET SENT");
-	    wl_module_config_register(STATUS, (1<<TX_DS)); //Clear Interrupt Bit
+	    wl_module_write_register_byte(STATUS, (1<<TX_DS)); //Clear Interrupt Bit
 	    PTX=0;
     }
 
 	if (status & (1<<MAX_RT)){ // IRQ: Package has not been sent, send again
 		display_write_line(1, "PACKET NOT SENT");
-		wl_module_config_register(STATUS, (1<<MAX_RT));	// Clear Interrupt Bit
+		wl_module_write_register_byte(STATUS, (1<<MAX_RT));	// Clear Interrupt Bit
 		wl_module_start_transmit();
 	}
 
 	if (status & (1<<RX_DR)){
-		wl_module_get_data(pload_data); // And get the data
+		wl_module_get_payload(pload_data); // And get the data
 		display_write_line(1, pload_data); // And write it to the display for test
-		wl_module_config_register(STATUS, (1<<RX_DR)); //Clear Interrupt Bit
+		wl_module_write_register_byte(STATUS, (1<<RX_DR)); //Clear Interrupt Bit
 	}
 
 	// Reset the RFID CS to what it was previously

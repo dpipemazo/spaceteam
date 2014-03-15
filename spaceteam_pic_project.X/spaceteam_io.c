@@ -50,6 +50,10 @@ void init_io(void)
     // Now, turn on the ADC module
     AD1CON1bits.ADON = 1;
 
+    // Set the chip selects high
+    LATAbits.LATA7 = 1;
+    LATBbits.LATB12 = 1;
+
     init_done = 1;
 
     return;

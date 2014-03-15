@@ -3,4 +3,5 @@ spaceteam_main.c  \
  spaceteam_io.h  \
 spaceteam_display.h  \
 spaceteam_rfid.h  \
-spaceteam_wireless.h 
+spaceteam_wireless.h  \
+ nrf24l01.h 

@@ -66,8 +66,9 @@ int main(void) {
     // char buf[] = "loop = x";
     rfid_status_t status;
     char rfid_id[10];
-    char payload[wl_module_PAYLOAD] = "Hello World!!!!!";
-    char address[wl_module_ADDR_LEN] = {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
+    char payload[wl_module_PAYLOAD_LEN] = "Hello World!";
+    char address[wl_module_ADDR_LEN] = {0xDE, 0xAD, 0xBE, 0xEF, 0xAC};
+    char curr_addr[wl_module_ADDR_LEN];
 
     // Initialize the data to make sure we're getting something
     for (i = 0; i < RFID_MAX_LEN; i++)
@@ -85,15 +86,17 @@ int main(void) {
     init_display();
 
     // Initialize the RFID
-    init_rfid();
+    // init_rfid();
 
     // Initialize the wireless to the address given
     init_wireless(address);
 
+    wl_module_read_register(TX_ADDR, curr_addr, wl_module_ADDR_LEN);
+
     // If we are the master, then we need to send a packet
     #ifdef WIRELESS_MASTER
         // Send a single packet, and see how it goes
-        wl_module_send(payload, wl_module_PAYLOAD);
+        wl_module_send_payload(payload);
     #endif
 
     // Loop doing some sort of test

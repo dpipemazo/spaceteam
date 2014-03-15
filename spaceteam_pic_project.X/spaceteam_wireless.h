@@ -34,17 +34,18 @@
 
 #include "xc.h"
 #include "spi.h"
+#include "nrf24l01.h"
 
 //
 // CHANGE THIS TO CHANGE FROM WIRELESS MASTER TO SLAVE
 //  Comment out the define to be a slave
 //  Master is the one PTX in the group, slaves are all PRX
-//
+// //
 #define WIRELESS_MASTER
 
 // WL-Module settings
 #define wl_module_CH			2
-#define wl_module_PAYLOAD		16
+#define wl_module_PAYLOAD_LEN	16
 #define wl_module_RF_DR_HIGH	0		//0 = 1Mbps, 1 = 2Mpbs
 #define wl_module_RF_SETUP		(RF_SETUP_RF_PWR_0 | RF_SETUP_RF_DR_250)
 #define wl_module_CONFIG		( (1<<EN_CRC) | (1<<CRCO) )
@@ -58,8 +59,8 @@
 #define wl_module_ADDR_LEN      5
 
 // Pin definitions for chip select and chip enabled of the wl-module
-#define wl_module_CE LATBbits.LATB15 // RA6
-#define wl_module_CSN LATAbits.LATA7 // RA7
+#define wl_module_CE    LATBbits.LATB15 // RA6
+#define wl_module_CSN   LATAbits.LATA7 // RA7
 
 // Definitions for selecting and enabling wl_module module
 #define wl_module_CSN_hi     wl_module_CSN = 1;
@@ -68,19 +69,20 @@
 #define wl_module_CE_lo      wl_module_CE = 0;
 
 // Defines for setting the wl_module `s for transmitting or receiving mode
-#define TX_POWERUP wl_module_config_register(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (0<<PRIM_RX) | (1 << EN_CRC) | (1 << CRC0) ) )
-#define RX_POWERUP wl_module_config_register(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (1<<PRIM_RX) ) )
+#define TX_POWERUP wl_module_write_register_byte(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (0<<PRIM_RX) ) )
+#define RX_POWERUP wl_module_write_register_byte(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (1<<PRIM_RX) ) )
 
 // Function declarations
 void init_wireless(unsigned char * address);
-void wl_module_set_tx_addr(unsigned char * address, unsigned char len);
-void wl_module_set_rx_addr(unsigned char * address, unsigned char len, unsigned char rxpipenum);
+void wl_module_set_address(unsigned char * address);
 unsigned char wl_module_get_status(void);
 void wl_module_send_command(unsigned char command, unsigned char * data, unsigned char data_len);
 void wl_module_read_register(unsigned char reg, unsigned char * value, unsigned char len);
+unsigned char wl_module_read_register_byte(unsigned char reg);
 void wl_module_write_register(unsigned char reg, unsigned char * value, unsigned char len);
-void wl_module_get_payload(unsigned char * pload, unsigned char pload_len);
-void wl_module_send_payload(unsigned char * pload, unsigned char pload_len);
+void wl_module_write_register_byte(unsigned char reg, unsigned char value);
+void wl_module_get_payload(unsigned char * pload);
+void wl_module_send_payload(unsigned char * pload);
 void wl_module_start_transmit(void);
 
 #endif /* _WL_MODULE_H_ */
