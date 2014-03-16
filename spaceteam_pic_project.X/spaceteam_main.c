@@ -60,9 +60,19 @@
 int main(void) {
     
     unsigned count;
+    char * line  = "This is a 32 character line!@$*#"
 
     // Want to initialize the game
-    init_game();
+    // init_game();
+
+
+    //
+    // TEST: initialize and test the new display scrolling
+    //
+    init_io();
+    init_display();
+
+
 
     while(1)
     {

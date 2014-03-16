@@ -7,9 +7,24 @@
 #include "spaceteam_spi.h"
 #include "spaceteam_io.h"
 #include "spaceteam_display.h"
+#include "spaceteam_req.h"
 
 #define FCY 8000000UL
 #include <libpic30.h>
+
+//
+// The two display line buffers and their variables
+//
+char line_1_buf[DISP_MAX_STR_LEN + 1];
+char line_2_buf[DISP_MAX_STR_LEN + 1];
+unsigned char line_1_scroll_idx;
+unsigned char line_2_scroll_idx;
+unsigned char line_1_scroll_on;
+unsigned char line_2_scroll_on;
+unsigned char line_1_new;
+unsigned char line_2_new;
+unsigned char line_1_len;
+unsigned char line_2_len;
 
 // This function initializes the display
 void init_display(void)
@@ -26,10 +41,155 @@ void init_display(void)
 		init_io();
 	}
 
+	// Clear both of the buffers
+	display_set_buffer(line_1_buf, DISP_MAX_STR_LEN + 1, 0);
+	display_set_buffer(line_2_buf, DISP_MAX_STR_LEN + 1, 0);
+
+	// Turn off scrolling for both lines
+	line_1_scroll_on = SCROLL_OFF;
+	line_2_scroll_on = SCROLL_OFF;
+
+	// reset the scroll indices for the two buffers
+	line_1_scroll_idx = 0;
+	line_2_scroll_idx = 0;
+
+	// Reset the "new line" variables
+	line_1_new = NO_NEW_LINE;
+	line_2_new = NO_NEW_LINE;
+
+	// Reset the length variables
+	line_1_len = 0;
+	line_2_len = 0;
+
+	// Set up the timer 4 interrupt for scrolling
+	init_timer_4();
+
 	// Now, reset the display and we are done
 	display_reset();
 
 }
+
+// This function initializes the timer 4 interrupt which
+//	will be used for scrolling
+void init_timer_4(void)
+{
+	// Set the counter value to the maximum, which gets it 
+	//	down to about 122 Hz. 
+	PR4 = TIMER_4_122Hz;
+
+	// Clear the timer's count register
+	TMR4 = 0;
+
+	// Set interrupt priority lower than that of wireless (7) and the 
+	//	game health timer (6) and the IO timer (5). So lowest priority
+	TIMER_4_PRIORITY = 4;
+
+	// Need to clear the interrupt flag
+	TIMER_4_INT_FLAG = 0;
+
+	// Turn on interrupts
+	TIMER_4_INT_ENABLE = 1;
+
+	// Turn on the timer and the prescaler
+	T4CON = (TIMER_4_ON | TIMER_4_POSTSCALE_16 | TIMER_4_PRESCALE_16);
+}
+
+// This is the timer 4 interrupt. This is responsible for scrolling the 
+//	display and actually writing new strings
+void _ISR _T4Interrupt(void)
+{
+	static int_counter = 0;
+
+	// If we have a new line to write , or if it's time to scroll 
+	if ( (line_1_new == NEW_LINE) || ( (int_counter == TIMER_4_INT_SCROLL) && (line_1_scroll_on == SCROLL_ON) ) )
+	{
+		// Rewrite the line
+		display_line_buf(DISPLAY_LINE_1);
+		// Note that we don't have a new line
+		line_1_new = NO_NEW_LINE;
+	}
+
+	if ( (line_2_new == NEW_LINE) || ( (int_counter == TIMER_4_INT_SCROLL) && (line_2_scroll_on == SCROLL_ON) ) )
+	{
+		// Rewrite the line
+		display_line_buf(DISPLAY_LINE_2);
+		// Note that we don't have a new line
+		line_2_new = NO_NEW_LINE;
+	}
+
+	// Need to increment the interrupt counter. We need
+	//	to only scroll the display when int_counter = T4_INT_SCROLL
+	int_counter = (int_counter + 1) % TIMER_4_INT_SCROLL;
+
+	// Need to clear the interrupt Flag
+	TIMER_4_INT_FLAG = 0;
+}
+
+// This function rewrites lines. It is meant to be called from the display interrupt, and 
+//	will scroll a line if necessary
+void display_line_buf(unsigned char line)
+{
+	unsigned char * buf;
+	unsigned char * scrollidx;
+	unsigned char scrollon;
+	unsigned char len;
+	unsigned char begin_address;
+	int i;
+	unsigned char idx = 0;
+
+	if (line == DISPLAY_LINE_1)
+	{
+		// Grab our variables
+		buf = line_1_buf;
+		scrollidx = &line_1_scroll_idx;
+		scrollon  = line_1_scroll_on;
+		begin_address = DISPLAY_LINE_1_START;
+		len = line_1_len;
+
+	}
+	else
+	{
+		// Grab our variables
+		buf = line_2_buf;
+		scrollidx = &line_2_scroll_idx;
+		scrollon  = line_2_scroll_on;
+		begin_address = DISPLAY_LINE_2_START;
+		len = line_2_len;
+	}
+
+	// Need to set the display address to the beginning of the
+	//	line which we will be writing
+	display_set_address(begin_address);
+
+	// If we need to scroll
+	if ((scrollon == SCROLL_ON) && (len > DISP_CHARS_PER_LINE))
+	{	
+		// Set our index equal to the scroll index to begin with
+		idx = *scrollidx;
+
+		// We need to write the display's length of characters
+		for (i = 0; i < DISP_CHARS_PER_LINE; i++)
+		{
+			// Write the character
+			display_write_char(buf[idx]);
+
+			// Recalculate our index, modding around the length of 
+			//	the string + 1 (to account for the space)
+			idx = (idx + 1) % (len + 1);
+		}
+
+		// Increment the scroll index
+		*scrollidx = (*scrollidx + 1) % (len + 1);
+	}
+	// If we do not need to scroll the string
+	else
+	{
+		// Write the character
+		display_write_char(buf[idx]);
+		idx++;
+	}
+}
+
 
 // This function sets the display control signals 
 void display_set_control_sigs(unsigned data)
@@ -88,21 +248,23 @@ void display_write_char(unsigned char data)
 	//	NOTE: The SPI clock is running at 1/2 of the system clock, 
 	//	so it will take 2*8 system clocks for the data to be valid, 
 	//	which should work out
-	spi_write(data);
+
+	// Write the data passed if the data is non-NULL, else
+	//	write a space
+	if (data != 0)
+	{
+		spi_write(data);
+	}
+	else
+	{
+		spi_write(' ');
+	}
 
 	// Need to set up the control signals to begin the write
 	display_set_control_sigs(RS_HIGH | RW_LOW | E_LOW);
 
-	// Wait a clock (need to wait 40 ns)
-	// Nop();
-
 	// Now pull E high in preparation for the write
 	display_set_control_sigs(RS_HIGH | RW_LOW | E_HIGH);
-
-	// Wait a few clocks (need to wait a minimum of 230 ns)
-	// Nop();
-	// Nop();
-	// Nop();
 
 	// The data should be valid by this point, can insert a few more Nops if it is not
 	//	so we can drop E and call it a day
@@ -149,18 +311,15 @@ void hex_to_string(unsigned data, char * out_str)
 // This function writes an unsigned number to the display as hexadecimal.
 // It will display it beginning at the line and inxed indicated. 
 // Line should be 0/1 and idx should be [0, 15]
-void display_write_hex(unsigned data, unsigned char line, unsigned char idx)
+void display_write_hex(unsigned data, unsigned char line)
 {
 	char disp_str[5];
 
 	// Convert the hexadecimal to a string
 	hex_to_string(data, disp_str);
 
-	// Set the display position to the desired position
-	display_set_address( (line * DISPLAY_LINE_2_START) + idx);
-
 	// And display the new string
-	display_write_string(disp_str);
+	display_write_line(line, disp_str);
 }
 
 // This function performs a display reset. Use it if the power-on-reset
@@ -198,28 +357,6 @@ void display_reset(void)
 	return;
 }
 
-// This function writes a null-terminated string to the display in sequential order, 
-//	up to 16 characters
-void display_write_string(char *str_to_write)
-{
-	int idx = 0;
-
-	// Make sure the pointer is mildly valid
-	if (str_to_write != NULL)
-	{
-		// Loop over the characters in the string until a null-terminus is hit or
-		//	more than 32 characters are written, since there are only 32 chars
-		//	on the entire display.
-		while( (str_to_write[idx] != 0) && (idx < 16) )
-		{
-			display_write_char(str_to_write[idx]);
-			idx++;
-		}
-	}
-
-	return;
-}
-
 // This function sets the display RAM address to the passed
 //	address. Line 1 begins at 0x00, Line 2 begins at 0x40. 
 //	Both lines go for 16 characters.
@@ -230,22 +367,34 @@ void display_set_address(unsigned char address)
 	__delay_us(50);
 }
 
-// Write up to 16 characters on a line of the display. 
-//	If line == 0 then the first line is written, else 
-//	the second line
+// This function just copies the line passed into the appropriate 
+//	line buffer which will then be displayed and scrolled
+//	by the interrupt function
 void display_write_line(unsigned char line, char * str)
 {
-	if (line == 0)
+	char * buffer;
+	char * new_line_ptr
+
+	// Figure out which buffer to use
+	if (line == DISPLAY_LINE_1)
 	{
-		display_set_address(DISPLAY_LINE_1_START);
+		buffer = line_1_buf;
+		new_line_ptr = &line_1_new;
 	}
 	else
 	{
-		display_set_address(DISPLAY_LINE_2_START);
+		buffer = line_2_buf;
+		new_line_ptr = &line_2_new;
 	}
 
-	// Now, write the string, 
-	display_write_string(str);
+	// First, clear the display buffer
+	display_set_buffer(buffer, DISP_MAX_STR_LEN, 0);
+	// Next, copy the string into the buffer
+	display_copy_string(str, buffer);
+	// Finally, note that we have a new line to the 
+	//	display interrupt
+	*new_line_ptr = NEW_LINE;
+
 }
 
 // Function to clear the display.
@@ -261,15 +410,6 @@ void display_write_debug(char * data, unsigned char line, unsigned char len)
 	unsigned char val, digit;
 	int i;
 	char disp_str[3] = "XX";
-
-	if (line == 0)
-	{
-		display_set_address(DISPLAY_LINE_1_START);
-	}
-	else
-	{
-		display_set_address(DISPLAY_LINE_2_START);
-	}
 
 	for(i = 0; i < len; i++)
 	{
@@ -293,9 +433,68 @@ void display_write_debug(char * data, unsigned char line, unsigned char len)
 			disp_str[1] = digit + ('A' - 10);
 		}
 
-		display_write_string(disp_str);
+		display_write_line(line, disp_str);
 
 	}
 
 }
+
+// This function takes a request type, board and value and prints out
+//	the appropriate string on the display. 
+//
+// 
+void display_write_request(spaceteam_req_t req, unsigned char board, unsigned val)
+{
+	char * req_verb;
+	char * req_name;
+	char request[MAX_REQ_STR_LEN];
+	unsigned char len;
+
+	req_verb = req_verbs[req];
+	req_name = req_names[req];
+
+	// First, clear the request buffer
+	display_set_buffer(request, MAX_REQ_STR_LEN, 0);
+
+	// Now, copy the verb into the buffer first
+	len = display_copy_string(req_verb, request);
+	// Put a space into the display buffer
+	request[len] = ' ';
+	// Finally copy the noun into the buffer
+	len = display_copy_string(req_noun, &request[len + 1]);
+
+	// Write the request to the display
+	display_write_line(DISPLAY_LINE_0, request);
+
+}
+
+// This function sets a buffer of the passed length to the passed value
+void display_set_buffer(char * buf, unsigned char len, unsigned char val)
+{
+	int i;
+	for (i = 0; i < len; i++)
+	{
+		buf[i] = val;
+	}
+}
+
+// This function copies a string from one pointer to another, and returns
+//	the length of the string copied. It will only copy the first
+//  DISP_MAX_STR_LEN bytes, if it is longer than that
+unsigned char display_copy_string(char * str, char * buf)
+{
+	unsigned char len = 0;
+
+	while( (str[len] != 0) && (len < DISP_MAX_STR_LEN) )
+	{
+		buf[len] = str[len];
+		len++;
+	}
+
+	// Null=terminate the buffer for good measure
+	buf[len] = 0;
+
+	return len;
+}
+
 
