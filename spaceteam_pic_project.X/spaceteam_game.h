@@ -112,5 +112,6 @@ void multiplex_leds(void);
 void update_key_buf(void);
 int is_begin_debounced(void);
 int scan_for_rfid(void);
+void set_game_rfid(unsigned char * data);
 
 #endif /* SPACETEAM_GAME_H_ */

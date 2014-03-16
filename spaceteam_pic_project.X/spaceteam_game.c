@@ -39,22 +39,22 @@ unsigned char rfid_buf[RFID_ID_LEN];
 // Table of possible RFID tokens
 unsigned char rfid_tokens[NUM_RFID_TOKENS][RFID_BYTES_PER_TOKEN] =
 	{
-		{0x00, 0x00, 0x00, 0x00}, // Token 1
-		{0x00, 0x00, 0x00, 0x00}, // Token 2
-		{0x00, 0x00, 0x00, 0x00}, // Token 3
-		{0x00, 0x00, 0x00, 0x00}, // Token 4
-		{0x00, 0x00, 0x00, 0x00}, // Token 5
-		{0x00, 0x00, 0x00, 0x00}, // Token 6
-		{0x00, 0x00, 0x00, 0x00}, // Token 7
-		{0x00, 0x00, 0x00, 0x00}, // Token 8
-		{0x00, 0x00, 0x00, 0x00}, // Token 9
-		{0x00, 0x00, 0x00, 0x00}, // Token 10
-		{0x00, 0x00, 0x00, 0x00}, // Token 11
-		{0x00, 0x00, 0x00, 0x00}, // Token 12
-		{0x00, 0x00, 0x00, 0x00}, // Token 13
-		{0x00, 0x00, 0x00, 0x00}, // Token 14
-		{0x00, 0x00, 0x00, 0x00}, // Token 15
-		{0x00, 0x00, 0x00, 0x00} // Token 16
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 1
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 2
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 3
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 4
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 5
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 6
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 7
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 8
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 9
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 10
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 11
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 12
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 13
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 14
+		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 15
+		{0xAA, 0xAA, 0xAA, 0xAA} // Token 16
 	};
 
 // Table of LSEL values based off of request type. This is only applicable for
@@ -98,7 +98,7 @@ void init_game_vars(void)
 	}
 
 	// We should not be doing mainloop RFID scans
-	do_mainloop_rfid = 0;
+	mainloop_scan_for_rfid = 0;
 }
 
 // Initialize the game. 
@@ -119,9 +119,7 @@ void init_game(void)
 
 	// Write some welcome lines to the display
 	display_write_line(DISPLAY_LINE_1, "Welcome to Spaceteam!");
-	display_write_line(DISPLAY_LINE_2, "Waiting for other players...")
-	display
-
+	display_write_line(DISPLAY_LINE_2, "Waiting for other players...");
 
 	// Initialize the RFID
 	init_rfid();
@@ -151,6 +149,9 @@ void begin_game(unsigned short num_boards)
 
 	// Set the game health
 	game_health = GAME_HEALTH_MAX;
+
+	// Need to clear the second line of the display
+	display_clear_line(DISPLAY_LINE_2);
 
 	// And generate our new request
 	generate_request();
@@ -185,12 +186,6 @@ void generate_request(void)
 	// Generate the request type
 	rand_val = lfsr_get_random();
 	my_req.type = rand_val % NO_REQ;
-
-	// For now, don't allow RFID requests since they break everything
-	if (my_req.type == RFID_REQ)
-	{
-		my_req.type += 1;
-	}
 
 	// Generate the request value
 	rand_val = lfsr_get_random();

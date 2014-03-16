@@ -244,8 +244,8 @@ unsigned get_knob_sample(void)
 void int_set_chip_selects(void)
 {   
     // Read the old values of the chip selects
-    wireless_cs_val = PORTAbits.PORTA7;
-    rfid_cs_val     = PORTBbits.PORTB12;
+    wireless_cs_val = PORTAbits.RA7;
+    rfid_cs_val     = PORTBbits.RB12;
 
     // Set them both high
     LATAbits.LATA7 = 1;
