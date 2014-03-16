@@ -57,6 +57,7 @@ unsigned char isel_vals[NO_REQ] =
 	{
 		0xFF, // Keypad doesn't need a LSEL value
 		0xFF, // RFID doesn't need a LSEL value
+		0xFF, // Knob doesn't need a LSEL value
 		11,   // PB1 = S1
 		2, 	  // PB2 = S4
 		13,   // PB3 = S9
@@ -65,15 +66,13 @@ unsigned char isel_vals[NO_REQ] =
 		3, 	  // Toggle2 = S3
 		9,    // Toggle3 = S8
 		12,   // Toggle4 = S11
-		0xFF, // Knob doesn't need a LSEL value
 		14,   // Tilt = S6
 		10,	  // IR = U1
 		1 	  // Reed = S7
 	};
 
-
-// Initialize the game. 
-void init_game(void)
+// Initialize the game-related variables
+void init_game_vars(void)
 {
 	int i;
 
@@ -91,12 +90,22 @@ void init_game(void)
 	{
 		key_buf[i] = 0;
 	}
+}
+
+// Initialize the game. 
+void init_game(void)
+{
+	int i;
+
+	// Initialize the game variables
+	init_game_vars();
 
 	// Initialize the IO
 	init_io();
 
 	// Initialize the display
 	init_display();
+	display_scroll_set(DISPLAY_LINE_1, SCROLL_ON);
 
 	// Initialize the RFID
 	init_rfid();
@@ -161,6 +170,12 @@ void generate_request(void)
 	rand_val = lfsr_get_random();
 	my_req.type = rand_val % NO_REQ;
 
+	// For now, don't allow RFID requests since they break everything
+	if (my_req.type == RFID_REQ)
+	{
+		my_req.type += 1;
+	}
+
 	// Generate the request value
 	rand_val = lfsr_get_random();
 	// Need to get the value based off of the request type
@@ -179,11 +194,6 @@ void generate_request(void)
 			my_req.val = rand_val % NUM_SWITCH_VALS;
 			break;
 	}
-
-	//
-	// Should probably display the request to the user 
-	//	in here somewhere
-	//
 
 	// Send a message issuing the request
 	send_message(MSG_NEW_REQ, my_req.type, my_req.board, my_req.val);
@@ -293,8 +303,23 @@ void _ISR _T1Interrupt(void)
 			// Send a message that our request failed
 			send_message(MSG_REQ_FAILED, my_req.type, my_req.board, my_req.val);
 
-			// And generate a new request
-			generate_request();
+			// Decrement the game health
+			game_health -= 1;
+
+			// If the game is over, then re-initialize everything
+			if (game_health == 0)
+			{
+				// Restart the game
+				init_game_vars();
+				// And print a game-over statement
+				display_clear();
+				display_write_line(DISPLAY_LINE_1, "GAME OVER!");
+			}
+			// Otherwise, generate a new request
+			else
+			{
+				generate_request();
+			}
 		}
 	}
 
@@ -383,15 +408,15 @@ void _ISR _T2Interrupt(void)
 
 					// Reallocate the message
 					active_requests[i].type = NO_REQ; 
+
+					// And generate a new request
+					generate_request();
 				}
 			}
 		}
 
 		// Multiplex the LEDs
 		multiplex_leds();
-
-		// Debounce a row of the keypad and put the result into the key buffer
-		update_key_buf();
 	}
 	// Otherwise, we need to look for the begin button being pressed to 
 	//	transition from the end of the game to something more usefun
@@ -439,20 +464,75 @@ int check_request_completed(int req_no)
 	return ret_val;
 }
 
-// This function will check to see if a keypad request has been completed
+// This function updates the key buffer by debouncing a row per call
+//	and putting any keys pressed into the correct location in the 
+//	key buffer
 int check_keypad_completed(unsigned val)
 {
-	unsigned keybuf_val;
+	unsigned char key;
+	static int idx = 0;
+	int i;
 	int ret_val = 0;
+	unsigned key_entry = 0xFFFF; // Not a valid combination
+	unsigned key_multiplier = 1000;
 
-	// Calculate the value of the key buffer
-	keybuf_val = 1000*key_buf[3] + 100*key_buf[2] + 10*key_buf[1] + key_buf[0];
+	// Check to see if we have a key
+	key = scan_and_debounce_keypad();
 
-	// And return the comparison 
-	if (keybuf_val == val)
+	// If we have a key, put it into the key_buf at the current index
+	//	and then increment the index, modding around the length of the
+	//	buffer
+	if (key != NO_KEY)
 	{
+		// Take different actions based on the type of key
+		switch(key)
+		{
+			// If we get a CLR, clear out the key buffer
+			case CLR_CODE:
+				for (i = 0; i < MAX_KEYPRESSES; i++)
+				{
+					key_buf[i] = 0;
+				}
+				idx = 0;
+				break;
+			// If we get a RUN code, compute the buffer's contents into an unsigned
+			case RUN_CODE:
+				key_entry = 0;
+				for (i = 0; i < MAX_KEYPRESSES; i++)
+				{
+					key_entry += key_multiplier*key_buf[i];
+					key_multiplier /= 10;
+				}
+				break;
+			// Otherwise, just put the key in the key
+			//	buffer.
+			default:
+				key_buf[idx] = key;
+				idx = (idx + 1) % MAX_KEYPRESSES;
+				break;
+		}
+
+		// Want to display the key buffer
+		display_key_buf(key_buf);
+	}
+
+	// If we got it right, return the right value and clear out the 
+	//	key buffer
+	if (key_entry == val)
+	{
+		// Clear out the buffer
+		for (i = 0; i < MAX_KEYPRESSES; i++)
+		{
+			key_buf[i] = 0;
+		}
+
+		// Clear the second line of the display
+		display_clear_line(DISPLAY_LINE_2);
+		
+		// update the return value
 		ret_val = 1;
 	}
+
 	return ret_val;
 }
 
@@ -518,7 +598,7 @@ int check_switch_completed(int req_no)
 int check_knob_completed(unsigned val)
 {
 	unsigned adc_val;
-	int ret_val;
+	int ret_val = 0;
 
 	// Get the raw sample
 	adc_val = get_knob_sample();
@@ -544,33 +624,12 @@ void multiplex_leds(void)
 	// If our LED should be on 
 	if ( (curr_LED < req_time) || ( (curr_LED >= MIN_HEALTH_LED) && (curr_LED < (game_health + MIN_HEALTH_LED)) ) )
 	{
-		// The turn it on
+		// Then turn it on
 		set_lsel(curr_LED);
 	}
 
 	// Increment by 1 and wrap around 15
 	curr_LED = (curr_LED + 1) & 0xF;
-}
-
-// This function updates the key buffer by debouncing a row per call
-//	and putting any keys pressed into the correct location in the 
-//	key buffer
-void update_key_buf(void)
-{
-	unsigned char key;
-	static int idx = 0;
-
-	// Check to see if we have a key
-	key = scan_and_debounce_keypad();
-
-	// If we have a key, put it into the key_buf at the current index
-	//	and then increment the index, modding around the length of the
-	//	buffer
-	if (key != NO_KEY)
-	{
-		key_buf[idx] = key;
-		idx = (idx + 1) % MAX_KEYPRESSES;
-	}
 }
 
 

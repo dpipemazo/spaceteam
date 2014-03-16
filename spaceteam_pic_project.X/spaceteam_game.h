@@ -26,6 +26,7 @@ typedef enum _spaceteam_req_t
 {
 	KEYPAD_REQ,
 	RFID_REQ,
+	KNOB_REQ,
 	PB1_REQ, // S1
 	PB2_REQ, // S4
 	PB3_REQ, // S9
@@ -33,8 +34,7 @@ typedef enum _spaceteam_req_t
 	TOGGLE1_REQ, // S2
 	TOGGLE2_REQ, // S3
 	TOGGLE3_REQ, // S8
-	TOGGLE4_REQ, // S11
-	KNOB_REQ, 
+	TOGGLE4_REQ, // S11 
 	TILT_REQ, // S6
 	IR_REQ,   // U1
 	REED_REQ,

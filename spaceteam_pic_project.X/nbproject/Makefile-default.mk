@@ -74,8 +74,8 @@ FIXDEPS=fixDeps
 .build-conf:  ${BUILD_SUBPROJECTS}
 	${MAKE}  -f nbproject/Makefile-default.mk dist/${CND_CONF}/${IMAGE_TYPE}/spaceteam_pic_project.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
-MP_PROCESSOR_OPTION=24F08KL402
-MP_LINKER_FILE_OPTION=,--script=p24F08KL402.gld
+MP_PROCESSOR_OPTION=24F16KL402
+MP_LINKER_FILE_OPTION=,--script=p24F16KL402.gld
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)

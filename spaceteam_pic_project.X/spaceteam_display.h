@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#include "spaceteam_game.h"
+
 // Map the chip registers to easier names
 #define DISPLAY_RS LATB.LATB0
 #define DISPLAY_RW LATB.LATB1
@@ -57,7 +59,7 @@ extern "C" {
 #define TIMER_4_INT_ENABLE 		IEC1bits.T4IE
 #define TIMER_4_PRIORITY		IPC6bits.T4IP
 #define TIMER_4_INT_FLAG		IFS1bits.T4IF
-#define TIMER_4_INT_SCROLL		50				// How many timer 4s to wait
+#define TIMER_4_INT_SCROLL		60				// How many timer 4s to wait
 												//	to scroll the display
 
 // Scrolling defines
@@ -84,12 +86,14 @@ void display_write_line(unsigned char line, char * str);
 void display_clear(void);
 void display_write_hex(unsigned data, unsigned char line);
 void hex_to_string(unsigned data, char * out_str);
-void display_write_debug(char * data, unsigned char line, unsigned char len);
 void display_line_buf(unsigned char line);
 void init_timer_4(void);
 void display_set_buffer(char * buf, unsigned char len, unsigned char val);
 unsigned char display_copy_string(char * str, char * buf);
 void display_scroll_set(unsigned char line, unsigned char setting);
+void display_write_request(spaceteam_req_t req, unsigned char board, unsigned val);
+void display_clear_line(unsigned char line);
+void display_key_buf(char * buf);
 
 #ifdef	__cplusplus
 }

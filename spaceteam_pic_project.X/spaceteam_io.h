@@ -83,12 +83,15 @@ extern "C" {
 // Kepyad constants
 #define KEYPAD_MASK 	0x0380 // Bits 9, 8 and 7
 #define COL_DRIVE_MASK 	0x0080 // Bit 7
-#define DEBOUNCE_TIME   500   // Pretty arbitrary, but the amount of time to debounce for
-#define AUTO_REP_TIME	5000
+#define DEBOUNCE_TIME   25		// ms
+#define AUTO_REP_TIME	500		// ms
 #define NUM_KEYS		12
-#define NO_KEY			0xFFFF
+#define NO_KEY			0xFF
 #define RUN_CODE 		10
 #define CLR_CODE		11
+
+// Amount of time to give LSEL to propogate, in microseconds
+#define LSEL_PROP_DELAY	50
 
 //
 // Function Declarations

@@ -5,4 +5,5 @@ nrf24l01.h  \
 nRF24L01.h  \
 spaceteam_spi.h  \
  spaceteam_display.h  \
+spaceteam_game.h  \
 spaceteam_rfid.h 

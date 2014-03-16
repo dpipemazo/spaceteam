@@ -6,8 +6,9 @@
 #include <stddef.h>
 #include "spaceteam_spi.h"
 #include "spaceteam_io.h"
+#include "spaceteam_game.h"
 #include "spaceteam_display.h"
-// #include "spaceteam_req.h"
+#include "spaceteam_req.h"
 
 #define FCY 8000000UL
 #include <libpic30.h>
@@ -375,6 +376,8 @@ void display_write_line(unsigned char line, char * str)
 	char * buffer;
 	char * new_line_ptr;
 	char * len_ptr;
+	unsigned char * scroll_idx;
+
 
 	// Figure out which buffer to use
 	if (line == DISPLAY_LINE_1)
@@ -382,13 +385,18 @@ void display_write_line(unsigned char line, char * str)
 		buffer = line_1_buf;
 		new_line_ptr = &line_1_new;
 		len_ptr = &line_1_len;
+		scroll_idx = &line_1_scroll_idx;
 	}
 	else
 	{
 		buffer = line_2_buf;
 		new_line_ptr = &line_2_new;
 		len_ptr = &line_2_len;
+		scroll_idx = &line_2_scroll_idx;
 	}
+
+	//Reset the scroll index
+	*scroll_idx = 0;
 
 	// First, clear the display buffer
 	display_set_buffer(buffer, DISP_MAX_STR_LEN, 0);
@@ -408,68 +416,78 @@ void display_clear(void)
 	__delay_ms(2);
 }
 
-// void display_write_debug(char * data, unsigned char line, unsigned char len)
-// {
-// 	unsigned char val, digit;
-// 	int i;
-// 	char disp_str[3] = "XX";
+// This function converts a decimal value to its ASCII string equivalent
+//	buf should be 5 chars long
+void dec_to_string(unsigned val, char * buf)
+{
+	unsigned divider = 1000;
+	unsigned char digit;
+	unsigned char count = 0;
+	unsigned rem;
 
-// 	for(i = 0; i < len; i++)
-// 	{
-// 		val = data[i];
-// 		digit = val / 16;
-// 		if( digit < 10)
-// 		{
-// 			disp_str[0] = digit + '0';
-// 		}
-// 		else
-// 		{
-// 			disp_str[0] = digit + ('A' - 10);
-// 		}
-// 		digit = val % 16;
-// 				if( digit < 10)
-// 		{
-// 			disp_str[1] = digit + '0';
-// 		}
-// 		else
-// 		{
-// 			disp_str[1] = digit + ('A' - 10);
-// 		}
+	rem = val;
 
-// 		display_write_line(line, disp_str);
+	while( divider != 0 )
+	{
+		digit 	= rem / divider;
+		rem 	= rem % divider;
+		divider = divider / 10;
+		buf[count] = digit + '0';
+		count++;
+	}
 
-// 	}
-
-// }
+	// Null-terminate the string
+	buf[count] = 0;
+}
 
 // This function takes a request type, board and value and prints out
 //	the appropriate string on the display. 
 //
 // 
-// void display_write_request(spaceteam_req_t req, unsigned char board, unsigned val)
-// {
-// 	char * req_verb;
-// 	char * req_name;
-// 	char request[DISP_MAX_STR_LEN];
-// 	unsigned char len;
+void display_write_request(spaceteam_req_t req, unsigned char board, unsigned val)
+{
+	char * req_verb;
+	char * req_name;
+	char request[DISP_MAX_STR_LEN];
+	unsigned char len;
+	char val_str[5];
 
-// 	req_verb = req_verbs[req];
-// 	req_name = req_names[req];
+	req_verb = req_verbs[req];
+	req_name = req_names[req];
 
-// 	// First, clear the request buffer
-// 	display_set_buffer(request, DISP_MAX_STR_LEN, 0);
+	// Convert the value to a string
+	dec_to_string(val, val_str);
 
-// 	// Now, copy the verb into the buffer first
-// 	len = display_copy_string(req_verb, request);
-// 	// Put a space into the display buffer
-// 	request[len] = ' ';
-// 	// Finally copy the noun into the buffer
-// 	len = display_copy_string(req_name, &request[len + 1]);
+	// First, clear the request buffer
+	display_set_buffer(request, DISP_MAX_STR_LEN, 0);
 
-// 	// Write the request to the display
-// 	display_write_line(DISPLAY_LINE_1, request);
+	// Now, copy the verb into the buffer first
+	len = display_copy_string(req_verb, request);
+	// Put a space into the display buffer
+	request[len] = ' ';
+	len += 1;
+	// copy the noun into the buffer
+	len += display_copy_string(req_name, &request[len]);
 
-// }
+	//
+	// If the display string requires a preposition
+	//	all reqs which require this are less than or equal to the
+	//	knob.
+	//
+	if ( req <= KNOB_REQ )
+	{
+		request[len] = ' ';
+		len += 1;
+		len += display_copy_string(req_preps[req], &request[len]);
+		request[len] = ' ';
+		len += 1;
+		len += display_copy_string(val_str, &request[len]);
+	}
+
+	// When all done, write the request to the display
+	display_write_line(DISPLAY_LINE_1, request);
+
+}
 
 // This function sets a buffer of the passed length to the passed value
 void display_set_buffer(char * buf, unsigned char len, unsigned char val)
@@ -478,6 +496,21 @@ void display_set_buffer(char * buf, unsigned char len, unsigned char val)
 	for (i = 0; i < len; i++)
 	{
 		buf[i] = val;
+	}
+}
+
+// This function clears a line of the display
+void display_clear_line(unsigned char line)
+{
+	if (line == DISPLAY_LINE_1)
+	{
+		display_set_buffer(line_1_buf, DISP_MAX_STR_LEN, 0);
+		line_1_new = NEW_LINE;
+	}
+	else
+	{
+		display_set_buffer(line_2_buf, DISP_MAX_STR_LEN, 0);
+		line_2_new = NEW_LINE;
 	}
 }
 
@@ -515,5 +548,45 @@ void display_scroll_set(unsigned char line, unsigned char setting)
 		line_2_scroll_idx = 0;
 	}
 }
+
+// This function takes a key buffer and displays it on the second line 
+//	of the display
+void display_key_buf(char * buf)
+{
+	// We have our own buffer, converted to ASCII
+	char line_buf[DISP_MAX_STR_LEN];
+	char ascii_keys[MAX_KEYPRESSES + 1];
+	int i;
+	unsigned char len = 0;
+
+	// First, clear the line buffer
+	display_set_buffer(line_buf, DISP_MAX_STR_LEN, 0);
+
+	// Copy and convert to ASCII
+	for (i = 0; i < MAX_KEYPRESSES; i++)
+	{
+		ascii_keys[i] = buf[i] + '0';
+	}
+
+	// Null-terminate the string
+	ascii_keys[i] = 0;
+
+	// Now, put the verb into the line
+	len += display_copy_string(req_names[KEYPAD_REQ], line_buf);
+	// Now, copy the equals sign into the line
+	len += display_copy_string(" = ", &line_buf[len]);
+	// Finally, copy the key buffer into the line
+	len += display_copy_string(ascii_keys, &line_buf[len]);
+
+	// And now we can write the string
+	display_write_line(DISPLAY_LINE_2, line_buf);
+
+}
+
+
+
+
+
+
 
 

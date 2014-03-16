@@ -7,6 +7,9 @@
 #include "spaceteam_display.h"
 #include "spaceteam_msg.h"
 
+#define FCY 8000000UL
+#include <libpic30.h> 
+
 // This function sends a spaceteam message packet to another board.
 //	If will eventually do this using the wireless, but for now, just 
 //	keep everything local
@@ -20,24 +23,15 @@ void send_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char board,
 		case MSG_NEW_REQ:
 			// Send the request right back to this board
 			register_request(req, board, val);
-
-			// Compile the request to display
-			req_str[0] = 'r';
-			hex_to_string(req, &req_str[1]);
-			req_str[5] = 'b';
-			hex_to_string(board, &req_str[6]);
-			req_str[10] = 'v';
-			hex_to_string(val, &req_str[11]);
-
-			// And display it
-			display_write_line(0, req_str);
+			display_write_request(req, board, val);
 			break;
 		case MSG_REQ_COMPLETED:
-			display_write_line(1, "Req Completed!");
+			deregister_request(req, board, val);
+			// display_write_line(DISPLAY_LINE_2, "Req Completed!");
 			break;
 		case MSG_REQ_FAILED:
 			deregister_request(req, board, val);
-			display_write_line(1, "Req Failed!");
+			// display_write_line(DISPLAY_LINE_2, "Req Failed!");
 			break;
 		default:
 			break;

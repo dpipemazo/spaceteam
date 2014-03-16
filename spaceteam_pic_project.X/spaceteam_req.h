@@ -45,20 +45,41 @@ const char  req_sequencer[] 	= "Sequencer";
 const char  req_perc[]			= "Percolator";
 const char  req_ship[]			= "YOUR SHIP";
 
+// These are request prepositions
+const char req_for[]			= "for";
+const char req_to[]				= "to";
+
+// Only need these for the first three
+const char * req_preps[KNOB_REQ] = {req_to, req_for, req_to};
+
 const char * req_verbs[NO_REQ] =
 {
-	req_set, 		req_provide, 	req_cycle, 		req_deactivate, 
+	req_set, 		req_provide, 	req_crank, 		req_cycle, 		req_deactivate, 
 	req_engage, 	req_vent, 		req_randomize, 	req_check, 
-	req_deploy, 	req_eject, 		req_crank, 		req_flip, 
+	req_deploy, 	req_eject,  	req_flip, 
 	req_flood, 		req_align
 };
 
 const char * req_names[NO_REQ] =
 {
-	req_thrust, 	req_auth,		req_vaporizer, 	req_network, 
+	req_thrust, 	req_auth,		req_distiller,  req_vaporizer, 	req_network, 
 	req_perc,		req_combustor, 	req_sequencer,	req_impeller, 
-	req_airbag, 	req_pilot, 		req_distiller, 	req_ship, 
+	req_airbag, 	req_pilot, 		req_ship, 
 	req_reflector, 	req_shields,
 };
 
+
 #endif /* SPACETEAM_REQ_H_ */
+
+
+
+
+
+
+
+
+
+
+
+
+

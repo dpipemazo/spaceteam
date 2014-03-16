@@ -54,6 +54,9 @@ void init_io(void)
     LATAbits.LATA7 = 1;
     LATBbits.LATB12 = 1;
 
+    // And initialize the keypad
+    init_keypad();
+
     init_done = 1;
 
     return;
@@ -148,15 +151,12 @@ unsigned char scan_and_debounce_keypad(void)
 
     // keycodes to return are 0 - 11, NO_KEY indicates
     //  that no key was returned
-    unsigned ret_val = NO_KEY;
+    unsigned char ret_val = NO_KEY;
 
     // First, we need to drive the keypad's column low
     curr_portb = PORTB;
     curr_portb = curr_portb & (~(COL_DRIVE_MASK << curr_col));
     LATB = curr_portb;
-
-    // Give it a few clocks to propogate
-    __delay_us(1);
 
     // Now, we want to look at the various rows and see if they are low
     for (i = 0; i < 4; i++)
@@ -168,7 +168,7 @@ unsigned char scan_and_debounce_keypad(void)
         set_isel(4 + i);
 
         // give it a few clocks to propogate 
-        // __delay_us(1);
+        __delay_us(LSEL_PROP_DELAY);
 
         // If the key has been pressed
         if(get_iomux() == 0)

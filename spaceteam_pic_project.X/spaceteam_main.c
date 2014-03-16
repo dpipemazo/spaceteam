@@ -60,23 +60,34 @@
 
 int main(void) {
     
-    unsigned count;
-    char * line  = "This is a 32 character line!@$*#";
+    unsigned char key;
 
     // Want to initialize the game
-    // init_game();
-
+    init_game();
 
     //
     // TEST: initialize and test the new display scrolling
     //
-    init_io();
-    init_display();
+    // init_io();
+    // init_display();
 
-    display_write_line(DISPLAY_LINE_1, line);
-    display_scroll_set(DISPLAY_LINE_1, SCROLL_ON);
+    // display_write_line(DISPLAY_LINE_1, line);
+    // display_scroll_set(DISPLAY_LINE_1, SCROLL_ON);
 
-    while(1){};
+    // Set the ISEL to the IR sensor
+    // set_isel(10);
+
+    // __delay_us(50);
+
+    while(1)
+    {
+        // key = scan_and_debounce_keypad();
+        // if (key != NO_KEY)
+        // {
+        //     display_write_char(key + '0');
+        // }
+        // __delay_ms(1000);
+    };
 
     return 0;
 }
