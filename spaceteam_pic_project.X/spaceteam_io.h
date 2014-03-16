@@ -108,6 +108,11 @@ unsigned char scan_and_debounce_keypad(void);
 unsigned get_knob_sample(void);
 unsigned char get_switch_val(unsigned char sw_req);
 
+// Functions for setting high and then resetting chip selects
+//	in interrupt context
+void int_set_chip_selects(void);
+void int_reset_chip_selects(void);
+
 
 #ifdef	__cplusplus
 }

@@ -34,6 +34,7 @@
 #include "spaceteam_spi.h"
 #include "spaceteam_display.h"
 #include "spaceteam_rfid.h"
+#include "spaceteam_io.h"
 #include <stddef.h>
 
 #define FCY 8000000UL
@@ -238,9 +239,8 @@ void _ISR _INT2Interrupt(void)
 	unsigned char status;
 	unsigned char rfid_cs_val;
 
-	// Pull the RFID chip select high
-	rfid_cs_val = RFID_CS;
-	RFID_CS = 1;
+	// Need to set chip selects
+	int_set_chip_selects();
 
     // Read wl_module status
     status = wl_module_get_status();
@@ -261,11 +261,11 @@ void _ISR _INT2Interrupt(void)
 		wl_module_write_register_byte(STATUS, (1<<RX_DR)); //Clear Interrupt Bit
 	}
 
-	// Reset the RFID CS to what it was previously
-	RFID_CS = rfid_cs_val;
-
     // reset INT2 flag
     IFS1bits.INT2IF = 0;
+
+    // And need to reset chip selects
+    int_reset_chip_selects();
 }
 
 

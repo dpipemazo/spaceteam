@@ -25,6 +25,11 @@ const unsigned char key_map[] = {
                                     CLR_CODE, 9, 6, 3  // COlumn 3
                                  };
 
+// Chip select values for remembering in interrupt context
+unsigned char wireless_cs_val;
+unsigned char rfid_cs_val;
+
+
 
 //
 // This function initializes the spaceteam program by 
@@ -228,4 +233,31 @@ unsigned get_knob_sample(void)
 
     return ADC1BUF0;
 
+}
+
+//
+// These functions MUST BE CALLED in the intro/outro of interrupts
+//  in order to not mess up SPI
+//
+
+// This one sets the chip selects high
+void int_set_chip_selects(void)
+{   
+    // Read the old values of the chip selects
+    wireless_cs_val = PORTAbits.PORTA7;
+    rfid_cs_val     = PORTBbits.PORTB12;
+
+    // Set them both high
+    LATAbits.LATA7 = 1;
+    LATBbits.LATB12 = 1;
+
+
+
+}
+
+// And this one resets them
+void int_reset_chip_selects(void)
+{
+    LATAbits.LATA7 = wireless_cs_val;
+    LATBbits.LATB12 = rfid_cs_val;
 }

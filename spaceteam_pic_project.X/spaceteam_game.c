@@ -329,6 +329,10 @@ void init_timer_1(void)
 //	value by 1
 void _ISR _T1Interrupt(void)
 {
+
+	// Need to set the chip selects
+	int_set_chip_selects();
+
 	if (game_state == GAME_STARTED)
 	{
 		// Decrease the request time by 1
@@ -365,6 +369,9 @@ void _ISR _T1Interrupt(void)
 
 	// Need to clear the interrupt flag
 	TIMER_1_INT_FLAG = 0;
+
+	// Needs to reset chip selects
+	int_reset_chip_selects();
 
 }
 
@@ -425,6 +432,9 @@ void _ISR _T2Interrupt(void)
 {
 	int i;
 
+	// Need to set the chip selects
+	int_set_chip_selects();
+
 	// If we are playing the game, we need to see if we have
 	//	completed any of our pending requests
 	if (game_state == GAME_STARTED)
@@ -469,6 +479,9 @@ void _ISR _T2Interrupt(void)
 
 	// Need to clear the interrupt Flag
 	TIMER_2_INT_FLAG = 0;
+
+	// And need to reset chip selects
+	int_reset_chip_selects();
 
 }
 
