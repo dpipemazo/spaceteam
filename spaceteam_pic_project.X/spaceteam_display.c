@@ -7,7 +7,7 @@
 #include "spaceteam_spi.h"
 #include "spaceteam_io.h"
 #include "spaceteam_display.h"
-#include "spaceteam_req.h"
+// #include "spaceteam_req.h"
 
 #define FCY 8000000UL
 #include <libpic30.h>
@@ -98,10 +98,10 @@ void init_timer_4(void)
 //	display and actually writing new strings
 void _ISR _T4Interrupt(void)
 {
-	static int_counter = 0;
+	static unsigned char int_counter = 0;
 
 	// If we have a new line to write , or if it's time to scroll 
-	if ( (line_1_new == NEW_LINE) || ( (int_counter == TIMER_4_INT_SCROLL) && (line_1_scroll_on == SCROLL_ON) ) )
+	if ( (line_1_new == NEW_LINE) || ( (int_counter == (TIMER_4_INT_SCROLL - 1) ) && (line_1_scroll_on == SCROLL_ON) ) )
 	{
 		// Rewrite the line
 		display_line_buf(DISPLAY_LINE_1);
@@ -109,7 +109,7 @@ void _ISR _T4Interrupt(void)
 		line_1_new = NO_NEW_LINE;
 	}
 
-	if ( (line_2_new == NEW_LINE) || ( (int_counter == TIMER_4_INT_SCROLL) && (line_2_scroll_on == SCROLL_ON) ) )
+	if ( (line_2_new == NEW_LINE) || ( (int_counter == (TIMER_4_INT_SCROLL - 1) ) && (line_2_scroll_on == SCROLL_ON) ) )
 	{
 		// Rewrite the line
 		display_line_buf(DISPLAY_LINE_2);
@@ -167,27 +167,27 @@ void display_line_buf(unsigned char line)
 		// Set our index equal to the scroll index to begin with
 		idx = *scrollidx;
 
-		// We need to write the display's length of characters
-		for (i = 0; i < DISP_CHARS_PER_LINE; i++)
-		{
-			// Write the character
-			display_write_char(buf[idx]);
-
-			// Recalculate our index, modding around the length of 
-			//	the string + 1 (to account for the space)
-			idx = (idx + 1) % (len + 1);
-		}
-
 		// Increment the scroll index
-		*scrollidx = (*scrollidx + 1) % (len + 1);
+		*scrollidx = (idx + 1) % (len + 1);
 	}
-	// If we do not need to scroll the string
+	// Since we don't need to scroll, make sure the
+	//	mod in the loop below doesn't do anything.
 	else
+	{
+		len = DISP_CHARS_PER_LINE;
+	}
+
+	// We need to write the display's length of characters
+	for (i = 0; i < DISP_CHARS_PER_LINE; i++)
 	{
 		// Write the character
 		display_write_char(buf[idx]);
-		idx++;
+
+		// Recalculate our index, modding around the length of 
+		//	the string + 1 (to account for the space)
+		idx = (idx + 1) % (len + 1);
 	}
+
 }
 
 
@@ -373,24 +373,27 @@ void display_set_address(unsigned char address)
 void display_write_line(unsigned char line, char * str)
 {
 	char * buffer;
-	char * new_line_ptr
+	char * new_line_ptr;
+	char * len_ptr;
 
 	// Figure out which buffer to use
 	if (line == DISPLAY_LINE_1)
 	{
 		buffer = line_1_buf;
 		new_line_ptr = &line_1_new;
+		len_ptr = &line_1_len;
 	}
 	else
 	{
 		buffer = line_2_buf;
 		new_line_ptr = &line_2_new;
+		len_ptr = &line_2_len;
 	}
 
 	// First, clear the display buffer
 	display_set_buffer(buffer, DISP_MAX_STR_LEN, 0);
 	// Next, copy the string into the buffer
-	display_copy_string(str, buffer);
+	*len_ptr = display_copy_string(str, buffer);
 	// Finally, note that we have a new line to the 
 	//	display interrupt
 	*new_line_ptr = NEW_LINE;
@@ -405,68 +408,68 @@ void display_clear(void)
 	__delay_ms(2);
 }
 
-void display_write_debug(char * data, unsigned char line, unsigned char len)
-{
-	unsigned char val, digit;
-	int i;
-	char disp_str[3] = "XX";
+// void display_write_debug(char * data, unsigned char line, unsigned char len)
+// {
+// 	unsigned char val, digit;
+// 	int i;
+// 	char disp_str[3] = "XX";
 
-	for(i = 0; i < len; i++)
-	{
-		val = data[i];
-		digit = val / 16;
-		if( digit < 10)
-		{
-			disp_str[0] = digit + '0';
-		}
-		else
-		{
-			disp_str[0] = digit + ('A' - 10);
-		}
-		digit = val % 16;
-				if( digit < 10)
-		{
-			disp_str[1] = digit + '0';
-		}
-		else
-		{
-			disp_str[1] = digit + ('A' - 10);
-		}
+// 	for(i = 0; i < len; i++)
+// 	{
+// 		val = data[i];
+// 		digit = val / 16;
+// 		if( digit < 10)
+// 		{
+// 			disp_str[0] = digit + '0';
+// 		}
+// 		else
+// 		{
+// 			disp_str[0] = digit + ('A' - 10);
+// 		}
+// 		digit = val % 16;
+// 				if( digit < 10)
+// 		{
+// 			disp_str[1] = digit + '0';
+// 		}
+// 		else
+// 		{
+// 			disp_str[1] = digit + ('A' - 10);
+// 		}
 
-		display_write_line(line, disp_str);
+// 		display_write_line(line, disp_str);
 
-	}
+// 	}
 
-}
+// }
 
 // This function takes a request type, board and value and prints out
 //	the appropriate string on the display. 
 //
 // 
-void display_write_request(spaceteam_req_t req, unsigned char board, unsigned val)
-{
-	char * req_verb;
-	char * req_name;
-	char request[MAX_REQ_STR_LEN];
-	unsigned char len;
+// void display_write_request(spaceteam_req_t req, unsigned char board, unsigned val)
+// {
+// 	char * req_verb;
+// 	char * req_name;
+// 	char request[DISP_MAX_STR_LEN];
+// 	unsigned char len;
 
-	req_verb = req_verbs[req];
-	req_name = req_names[req];
+// 	req_verb = req_verbs[req];
+// 	req_name = req_names[req];
 
-	// First, clear the request buffer
-	display_set_buffer(request, MAX_REQ_STR_LEN, 0);
+// 	// First, clear the request buffer
+// 	display_set_buffer(request, DISP_MAX_STR_LEN, 0);
 
-	// Now, copy the verb into the buffer first
-	len = display_copy_string(req_verb, request);
-	// Put a space into the display buffer
-	request[len] = ' ';
-	// Finally copy the noun into the buffer
-	len = display_copy_string(req_noun, &request[len + 1]);
+// 	// Now, copy the verb into the buffer first
+// 	len = display_copy_string(req_verb, request);
+// 	// Put a space into the display buffer
+// 	request[len] = ' ';
+// 	// Finally copy the noun into the buffer
+// 	len = display_copy_string(req_name, &request[len + 1]);
 
-	// Write the request to the display
-	display_write_line(DISPLAY_LINE_0, request);
+// 	// Write the request to the display
+// 	display_write_line(DISPLAY_LINE_1, request);
 
-}
+// }
 
 // This function sets a buffer of the passed length to the passed value
 void display_set_buffer(char * buf, unsigned char len, unsigned char val)
@@ -495,6 +498,22 @@ unsigned char display_copy_string(char * str, char * buf)
 	buf[len] = 0;
 
 	return len;
+}
+
+// This function takes a line and a scroll setting and applies is
+void display_scroll_set(unsigned char line, unsigned char setting)
+{
+
+	if (line == DISPLAY_LINE_1)
+	{
+		line_1_scroll_on = setting;
+		line_1_scroll_idx = 0;
+	}
+	else
+	{
+		line_2_scroll_on = setting;
+		line_2_scroll_idx = 0;
+	}
 }
 
 

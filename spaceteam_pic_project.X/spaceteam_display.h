@@ -87,6 +87,9 @@ void hex_to_string(unsigned data, char * out_str);
 void display_write_debug(char * data, unsigned char line, unsigned char len);
 void display_line_buf(unsigned char line);
 void init_timer_4(void);
+void display_set_buffer(char * buf, unsigned char len, unsigned char val);
+unsigned char display_copy_string(char * str, char * buf);
+void display_scroll_set(unsigned char line, unsigned char setting);
 
 #ifdef	__cplusplus
 }

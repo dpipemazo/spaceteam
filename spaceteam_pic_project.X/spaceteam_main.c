@@ -8,6 +8,7 @@
 #include "xc.h"
 #include "spaceteam_game.h"
 #include "spaceteam_display.h"
+#include "spaceteam_io.h"
 
 //
 // Define the clock frequency
@@ -60,7 +61,7 @@
 int main(void) {
     
     unsigned count;
-    char * line  = "This is a 32 character line!@$*#"
+    char * line  = "This is a 32 character line!@$*#";
 
     // Want to initialize the game
     // init_game();
@@ -72,15 +73,10 @@ int main(void) {
     init_io();
     init_display();
 
+    display_write_line(DISPLAY_LINE_1, line);
+    display_scroll_set(DISPLAY_LINE_1, SCROLL_ON);
 
-
-    while(1)
-    {
-        // Everything should be done in interrupts.... so 
-        //  we can theoretically just NOP in here unless
-        //  we have something better to do
-        count++;
-    }
+    while(1){};
 
     return 0;
 }
