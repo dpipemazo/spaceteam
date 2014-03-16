@@ -9,6 +9,7 @@
 #include "spaceteam_game.h"
 #include "spaceteam_display.h"
 #include "spaceteam_io.h"
+#include "spaceteam_rfid.h"
 
 //
 // Define the clock frequency
@@ -60,33 +61,31 @@
 
 int main(void) {
     
-    unsigned char key;
+    unsigned char rfid_data[RFID_ID_LEN];
 
     // Want to initialize the game
     init_game();
 
-    //
-    // TEST: initialize and test the new display scrolling
-    //
-    // init_io();
-    // init_display();
-
-    // display_write_line(DISPLAY_LINE_1, line);
-    // display_scroll_set(DISPLAY_LINE_1, SCROLL_ON);
-
-    // Set the ISEL to the IR sensor
-    // set_isel(10);
-
-    // __delay_us(50);
 
     while(1)
     {
-        // key = scan_and_debounce_keypad();
-        // if (key != NO_KEY)
-        // {
-        //     display_write_char(key + '0');
-        // }
-        // __delay_ms(1000);
+        //
+        // The only thing that we do in the mainloop is scan for 
+        //  RFID tokens, if needed.
+        //
+        if (scan_for_rfid())
+        {
+            // Get the current token, if there is one
+            if (rfid_get_token(rfid_data) == RFID_SUCCESS)
+            {
+                // If we got a token, send it to the game module
+                //  for processing
+                set_game_rfid(rfid_data);
+            }
+
+            // Scan for RFID roughly once per second
+            __delay_ms(1000);
+        }
     };
 
     return 0;

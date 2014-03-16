@@ -17,9 +17,7 @@
 #define NUM_RFID_REQS			1
 
 // The maximum ADC range
-#define MAX_ADC_RANGE 10
-#define MAX_ADC_VAL 0x0400
-#define ADC_RANGE_DIVIDER (MAX_ADC_VAL / MAX_ADC_RANGE)
+#define ADC_RANGE_DIVIDER 100
 
 // The types of requests which the game can make
 typedef enum _spaceteam_req_t
@@ -43,7 +41,7 @@ typedef enum _spaceteam_req_t
 
 // Modulos for different request types
 #define NUM_KEYPAD_VALS 10000
-#define NUM_KNOB_VALS   10
+#define NUM_KNOB_VALS   11			// Valid values are 0 - 10
 #define NUM_SWITCH_VALS	2
 
 typedef struct _spaceteam_request
@@ -81,7 +79,7 @@ typedef struct _spaceteam_request
 #define GAME_HEALTH_MAX			8
 
 // LSEL value for the begin button
-#define BEGIN_LSEL_VAL			8
+#define BEGIN_ISEL_VAL			8
 
 // Different states that the game can be in
 typedef enum _game_state_t
@@ -113,5 +111,6 @@ int check_knob_completed(unsigned val);
 void multiplex_leds(void);
 void update_key_buf(void);
 int is_begin_debounced(void);
+int scan_for_rfid(void);
 
 #endif /* SPACETEAM_GAME_H_ */

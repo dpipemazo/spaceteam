@@ -86,6 +86,13 @@ void set_isel(unsigned char val)
     return;
 }
 
+unsigned char get_switch_val(unsigned char sw_req)
+{
+    set_isel(sw_req);
+    __delay_us(LSEL_PROP_DELAY);
+    return get_iomux();
+}
+
 
 // Use this function to set the select lines of the
 //  LED mux to the passed value. Argument should
@@ -106,7 +113,7 @@ void set_lsel(unsigned val)
 }
 
 // Use this function to get the value of IO mux
-unsigned get_iomux(void)
+unsigned char get_iomux(void)
 {
     unsigned val;
 

@@ -27,8 +27,14 @@ spaceteam_request_t active_requests[MAX_NUM_PLAYERS];
 // Our request
 spaceteam_request_t my_req;
 
+// Whether or not we should be doing RFID scans in the mainloop
+unsigned char mainloop_scan_for_rfid;
+
 // Buffer which holds keypresses
 unsigned char key_buf[MAX_KEYPRESSES];
+
+// Buffer which holds RFID values
+unsigned char rfid_buf[RFID_ID_LEN];
 
 // Table of possible RFID tokens
 unsigned char rfid_tokens[NUM_RFID_TOKENS][RFID_BYTES_PER_TOKEN] =
@@ -90,6 +96,9 @@ void init_game_vars(void)
 	{
 		key_buf[i] = 0;
 	}
+
+	// We should not be doing mainloop RFID scans
+	do_mainloop_rfid = 0;
 }
 
 // Initialize the game. 
@@ -106,6 +115,13 @@ void init_game(void)
 	// Initialize the display
 	init_display();
 	display_scroll_set(DISPLAY_LINE_1, SCROLL_ON);
+	display_scroll_set(DISPLAY_LINE_2, SCROLL_ON);
+
+	// Write some welcome lines to the display
+	display_write_line(DISPLAY_LINE_1, "Welcome to Spaceteam!");
+	display_write_line(DISPLAY_LINE_2, "Waiting for other players...")
+	display
+
 
 	// Initialize the RFID
 	init_rfid();
@@ -191,7 +207,9 @@ void generate_request(void)
 			my_req.val = rand_val % NUM_RFID_REQS;
 			break;
 		default:
-			my_req.val = rand_val % NUM_SWITCH_VALS;
+			// For switches, it's always a toggle
+			//	from the current state
+			my_req.val = 0;
 			break;
 	}
 
@@ -213,6 +231,8 @@ void generate_request(void)
 void register_request(spaceteam_req_t type, unsigned char board, unsigned val)
 {
 	int i;
+	unsigned char switch_val;
+
 	// Copy the request into our active requests array at the 
 	//	first available index
 	for (i = 0; i < MAX_NUM_PLAYERS; i++)
@@ -221,8 +241,28 @@ void register_request(spaceteam_req_t type, unsigned char board, unsigned val)
 		{
 			active_requests[i].type 	= type;
 			active_requests[i].board 	= board;
-			active_requests[i].val 		= val;
 			active_requests[i].debounce_count = IO_DEBOUNCE_COUNT;
+
+			// If this is a switch request, we need to figure out what the
+			//	current state of the switch is so that we can set the 
+			//	request value as a toggle
+			if (type > KNOB_REQ)
+			{
+				switch_val = get_switch_val(isel_vals[type]);
+				if (switch_val == 0)
+				{
+					active_requests[i].val = 1;
+				}
+				else
+				{
+					active_requests[i].val = 0;
+				}
+			}
+			else
+			{
+				active_requests[i].val = val;
+			}
+
 			break;
 		}
 	}
@@ -358,11 +398,8 @@ int is_begin_debounced(void)
 	static char db_val;
 	int ret_val = 0;
 
-	// Set LSEL for the begin button
-	set_isel(BEGIN_LSEL_VAL);
-
 	// If the button is pressed (active low)
-	if (get_iomux() == 0)
+	if (get_switch_val(BEGIN_ISEL_VAL) == 0)
 	{
 		db_val -= 1;
 	}
@@ -528,7 +565,7 @@ int check_keypad_completed(unsigned val)
 
 		// Clear the second line of the display
 		display_clear_line(DISPLAY_LINE_2);
-		
+
 		// update the return value
 		ret_val = 1;
 	}
@@ -544,27 +581,56 @@ int check_rfid_completed(unsigned val)
 	int ret_val = 0;
 	int successes = 0;
 
-	// Get the current token, if there is one
-	if (rfid_get_token(rfid_data) == RFID_SUCCESS)
-	{
-		// If we got a token, see if it matches the one we want
-		for (i = 0; i < RFID_BYTES_PER_TOKEN; i++)
-		{
-			// If it matches, increment a success counter
-			if (rfid_data[i] == rfid_tokens[val][i])
-			{
-				successes++;
-			}
-		}
+	// Set the flag that we should be doing RFID scans in the mainloop
+	mainloop_scan_for_rfid = 1;
 
-		// If we successfully matched on each byte
-		if (successes == RFID_BYTES_PER_TOKEN)
+	// Check the rfid_buffer
+	for (i = 0; i < RFID_ID_LEN; i++)
+	{
+		if (rfid_buf[i] == rfid_tokens[val][i])
 		{
-			ret_val = 1;
+			successes++;
 		}
 	}
 
+	// If we have RFID_ID_LEN successes, then we have the correct value
+	if (successes == RFID_ID_LEN)
+	{
+		ret_val = 1;
+		// And want to clear the internal RFID buffer
+		for (i = 0; i < RFID_ID_LEN; i++)
+		{
+			rfid_buf[i] = 0;
+		}
+		// And also want to turn off scanning in the mainloop
+		mainloop_scan_for_rfid = 0;
+		// And finally, want to clear the second line of the display
+		//	which should be showing an RFID token
+		display_clear_line(DISPLAY_LINE_2);
+	} 
+
 	return ret_val;
+}
+
+// This function tells the mainloop whether or not it should be scanning for RFID values
+int scan_for_rfid(void)
+{	
+	return mainloop_scan_for_rfid;
+}
+
+// This function takes an RFID value found by the mainloop and 
+//	writes it to our internal RFID buffer
+void set_game_rfid(unsigned char * data)
+{
+	int i;
+
+	for (i = 0; i < RFID_ID_LEN; i++)
+	{	
+		rfid_buf[i] = data[i];
+	}
+
+	// Display the RFID token acquired
+	display_rfid_token(data);
 }
 
 // This function will check to see if a switch request has been completed
@@ -572,11 +638,8 @@ int check_switch_completed(int req_no)
 {
 	int ret_val = 0;
 
-	// Set the ISEL so that we can read the desired switch
-	set_isel(isel_vals[active_requests[req_no].type]);
-
 	// If the switch is pressed, then decrement the debounce counter
-	if(get_iomux() == active_requests[req_no].val)
+	if(get_switch_val(isel_vals[active_requests[req_no].type]) == active_requests[req_no].val)
 	{
 		active_requests[req_no].debounce_count -= 1;
 		// If the switch has been debounced
@@ -603,7 +666,7 @@ int check_knob_completed(unsigned val)
 	// Get the raw sample
 	adc_val = get_knob_sample();
 	// Map it into the range [1, MAX_ADC_RANGE]
-	adc_val = (adc_val / ADC_RANGE_DIVIDER) + 1;
+	adc_val = adc_val / ADC_RANGE_DIVIDER;
 
 	if (adc_val == val)
 	{
@@ -631,6 +694,8 @@ void multiplex_leds(void)
 	// Increment by 1 and wrap around 15
 	curr_LED = (curr_LED + 1) & 0xF;
 }
+
+
 
 
 

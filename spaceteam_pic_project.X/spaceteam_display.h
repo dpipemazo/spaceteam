@@ -94,6 +94,7 @@ void display_scroll_set(unsigned char line, unsigned char setting);
 void display_write_request(spaceteam_req_t req, unsigned char board, unsigned val);
 void display_clear_line(unsigned char line);
 void display_key_buf(char * buf);
+void display_rfid_token(char * data);
 
 #ifdef	__cplusplus
 }

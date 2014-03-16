@@ -101,11 +101,12 @@ void init_io(void);
 int is_io_initialized(void);
 void set_isel(unsigned char val);
 void set_lsel(unsigned val);
-unsigned get_iomux(void);
+unsigned char get_iomux(void);
 
 void init_keypad(void);
 unsigned char scan_and_debounce_keypad(void);
 unsigned get_knob_sample(void);
+unsigned char get_switch_val(unsigned char sw_req);
 
 
 #ifdef	__cplusplus

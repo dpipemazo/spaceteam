@@ -50,9 +50,9 @@ const char req_for[]			= "for";
 const char req_to[]				= "to";
 
 // Only need these for the first three
-const char * req_preps[KNOB_REQ] = {req_to, req_for, req_to};
+const char * req_preps[] = {req_to, req_for, req_to};
 
-const char * req_verbs[NO_REQ] =
+const char * req_verbs[] =
 {
 	req_set, 		req_provide, 	req_crank, 		req_cycle, 		req_deactivate, 
 	req_engage, 	req_vent, 		req_randomize, 	req_check, 
@@ -60,7 +60,7 @@ const char * req_verbs[NO_REQ] =
 	req_flood, 		req_align
 };
 
-const char * req_names[NO_REQ] =
+const char * req_names[] =
 {
 	req_thrust, 	req_auth,		req_distiller,  req_vaporizer, 	req_network, 
 	req_perc,		req_combustor, 	req_sequencer,	req_impeller, 

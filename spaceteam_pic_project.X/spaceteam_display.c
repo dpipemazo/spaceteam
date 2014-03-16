@@ -583,6 +583,19 @@ void display_key_buf(char * buf)
 
 }
 
+// Thus function displays an RFID token that is received. Eventually
+//	it will use a naming scheme, but for now it just shows the raw hex
+void display_rfid_token(char * data)
+{
+	char token_str[9];
+	// An RFID token is essentially two hex values, so treat it as such
+	hex_to_string(data[0] + (data[1] << 8), token_str);
+	hex_to_string(data[2] + (data[3] << 8), &token_str[4]);
+	// Null-terminate the string
+	token_str[8] = 0;
+
+	display_write_line(DISPLAY_LINE_2, token_str);
+}
 
 
 
