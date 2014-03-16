@@ -62,6 +62,7 @@
 int main(void) {
     
     unsigned char rfid_data[RFID_ID_LEN];
+    rfid_status_t status;
 
     // Want to initialize the game
     init_game();
@@ -75,13 +76,20 @@ int main(void) {
         //
         if (scan_for_rfid())
         {
+            status = rfid_get_token(rfid_data);
             // Get the current token, if there is one
-            if (rfid_get_token(rfid_data) == RFID_SUCCESS)
+            if (status == RFID_SUCCESS)
             {
                 // If we got a token, send it to the game module
                 //  for processing
                 set_game_rfid(rfid_data);
             }
+            // If an error occurred, then just reset the module
+            else if (status == RFID_ERROR)
+            {
+                init_rfid();
+            }
+
 
             // Scan for RFID roughly once per second
             __delay_ms(1000);

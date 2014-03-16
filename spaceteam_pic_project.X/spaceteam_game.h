@@ -14,7 +14,7 @@
 // The number of possible RFID tokens
 #define NUM_RFID_TOKENS 		16
 #define RFID_BYTES_PER_TOKEN 	4
-#define NUM_RFID_REQS			1
+#define NUM_RFID_REQS			4 // Only have four cards in the database now
 
 // The maximum ADC range
 #define ADC_RANGE_DIVIDER 100

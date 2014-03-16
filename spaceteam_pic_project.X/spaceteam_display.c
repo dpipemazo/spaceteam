@@ -589,8 +589,8 @@ void display_rfid_token(char * data)
 {
 	char token_str[9];
 	// An RFID token is essentially two hex values, so treat it as such
-	hex_to_string(data[0] + (data[1] << 8), token_str);
-	hex_to_string(data[2] + (data[3] << 8), &token_str[4]);
+	hex_to_string(data[1] + (data[0] << 8), token_str);
+	hex_to_string(data[3] + (data[2] << 8), &token_str[4]);
 	// Null-terminate the string
 	token_str[8] = 0;
 

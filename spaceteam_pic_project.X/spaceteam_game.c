@@ -37,12 +37,12 @@ unsigned char key_buf[MAX_KEYPRESSES];
 unsigned char rfid_buf[RFID_ID_LEN];
 
 // Table of possible RFID tokens
-unsigned char rfid_tokens[NUM_RFID_TOKENS][RFID_BYTES_PER_TOKEN] =
+unsigned char rfid_tokens[NUM_RFID_TOKENS][RFID_ID_LEN] =
 	{
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 1
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 2
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 3
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 4
+		{0xF5, 0x02, 0x9D, 0xE2}, // Token 1
+		{0x85, 0xB9, 0x3B, 0xE3}, // Token 2
+		{0xF4, 0x83, 0x97, 0x5B}, // Token 3
+		{0x44, 0x81, 0x97, 0x5B}, // Token 4
 		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 5
 		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 6
 		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 7
@@ -125,7 +125,7 @@ void init_game(void)
 	init_rfid();
 
 	// Initialize the wireless
-	//	commented out for now until we veryify that the game works on one board
+	//	commented out for now until we verify that the game works on one board
 	// init_wireless();
 
 	// Initialize the timers
@@ -185,7 +185,8 @@ void generate_request(void)
 
 	// Generate the request type
 	rand_val = lfsr_get_random();
-	my_req.type = rand_val % NO_REQ;
+	// my_req.type = rand_val % NO_REQ;
+	my_req.type = RFID_REQ;
 
 	// Generate the request value
 	rand_val = lfsr_get_random();
@@ -584,7 +585,7 @@ int check_keypad_completed(unsigned val)
 // This function will check to see if an RFID request has been completed
 int check_rfid_completed(unsigned val)
 {
-	unsigned char rfid_data[RFID_BYTES_PER_TOKEN];
+	unsigned char rfid_data[RFID_ID_LEN];
 	int i;
 	int ret_val = 0;
 	int successes = 0;
