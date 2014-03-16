@@ -185,8 +185,13 @@ void generate_request(void)
 
 	// Generate the request type
 	rand_val = lfsr_get_random();
-	// my_req.type = rand_val % NO_REQ;
-	my_req.type = RFID_REQ;
+	my_req.type = rand_val % NO_REQ;
+
+	// IR seems to be broken in hardware for now...
+	if (my_req.type == IR_REQ)
+	{
+		my_req.type += 1;
+	}
 
 	// Generate the request value
 	rand_val = lfsr_get_random();

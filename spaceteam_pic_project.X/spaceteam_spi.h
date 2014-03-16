@@ -12,9 +12,11 @@
 extern "C" {
 #endif
 
+#define DISI_MAX_VAL 0x3FFF
+
 // Function declarations
 void init_spi(void);
-unsigned spi_write(unsigned char data);
+unsigned char spi_write(unsigned char data);
 int is_spi_initialized(void);
 void spi_write_multiple(unsigned char * datain, unsigned char * dataout, unsigned char length);
 

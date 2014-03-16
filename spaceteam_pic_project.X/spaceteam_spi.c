@@ -5,6 +5,7 @@
  */
 
  #include "xc.h"
+ #include "spaceteam_spi.h"
  #include <stddef.h>
 
  static char init_done = 0;
@@ -26,9 +27,14 @@
  }
 
  // This function can be used to write a byte to the SPI bus
-unsigned char spi_write(unsigned char data)
+unsigned char _spi_write(unsigned char data, unsigned char turn_off_int)
  {
     unsigned char ret_val;
+
+    if (turn_off_int != 0)
+    {
+        __builtin_disi(DISI_MAX_VAL);
+    }
 
     // Do a dummy read to clear the BF flag
     //  if it's set
@@ -42,8 +48,18 @@ unsigned char spi_write(unsigned char data)
 
     ret_val = SSP1BUF;
 
+    if (turn_off_int != 0)
+    {
+        __builtin_disi(0x0000);
+    }
+
     return ret_val;
 
+ }
+
+ unsigned char spi_write(unsigned char data)
+ {
+    return _spi_write(data, 1);
  }
 
  // This function returns 1 if SPI has been initialized, else 0
@@ -60,19 +76,22 @@ unsigned char spi_write(unsigned char data)
     int i;
     unsigned char temp_val;
 
+    // Turn off interrupts
+    __builtin_disi(DISI_MAX_VAL);
+
     // Do a SPI write for all of the data in the buffer
     for( i = 0; i < length; i++)
     {
         // Do the SPI write, if we have data to write
         if (datain != NULL)
         {
-            temp_val = spi_write(datain[i]);
+            temp_val = _spi_write(datain[i], 0);
         }
         // Or, we may be trying to do a read, in which case
         //  just send zeroes
         else
         {
-            temp_val = spi_write(0);
+            temp_val = _spi_write(0, 0);
         }
         
         // And write the return value to the output buffer if
@@ -82,6 +101,9 @@ unsigned char spi_write(unsigned char data)
             dataout[i] = temp_val;
         }
     }
+
+    // Turn interrupts back on
+    __builtin_disi(0);
  }
 
 
