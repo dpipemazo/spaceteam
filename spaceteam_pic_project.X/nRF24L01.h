@@ -57,6 +57,8 @@
 #define RX_PW_P4    0x15
 #define RX_PW_P5    0x16
 #define FIFO_STATUS 0x17
+#define DYNPD       0x1C
+#define FEATURE     0x1D
 
 //Bit Mnemonics
 #define MASK_RX_DR  6
@@ -105,6 +107,7 @@
 #define REGISTER_MASK	0x1F
 #define R_RX_PAYLOAD	0x61
 #define W_TX_PAYLOAD	0xA0
+#define W_ACK_PAYLOAD   0xA8
 #define FLUSH_TX		0xE1
 #define FLUSH_RX		0xE2
 #define REUSE_TX_PL		0xE3

@@ -461,8 +461,13 @@ void display_write_request(spaceteam_req_t req, unsigned char board, unsigned va
 	// First, clear the request buffer
 	display_set_buffer(request, DISP_MAX_STR_LEN, 0);
 
+	// Copy the board number and a space into the buffer for debug
+	request[0] = '0' + board;
+	request[1] = ' ';
+	len = 2;
+
 	// Now, copy the verb into the buffer first
-	len = display_copy_string(req_verb, request);
+	len += display_copy_string(req_verb, &request[len]);
 	// Put a space into the display buffer
 	request[len] = ' ';
 	len += 1;

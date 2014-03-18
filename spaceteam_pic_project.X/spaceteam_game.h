@@ -13,7 +13,6 @@
 
 // The number of possible RFID tokens
 #define NUM_RFID_TOKENS 		16
-#define RFID_BYTES_PER_TOKEN 	4
 #define NUM_RFID_REQS			4 // Only have four cards in the database now
 
 // The maximum ADC range
@@ -93,7 +92,7 @@ typedef enum _game_state_t
 // Function declarations
 //
 void init_game(void);
-void begin_game(unsigned short num_boards);
+void begin_game(void);
 unsigned lfsr_get_random(void);
 void generate_request(void);
 void register_request(spaceteam_req_t type, unsigned char board, unsigned val);
@@ -113,5 +112,9 @@ void update_key_buf(void);
 int is_begin_debounced(void);
 int scan_for_rfid(void);
 void set_game_rfid(unsigned char * data);
+int dec_game_health(void);
+void register_player(unsigned char player);
+unsigned char * get_active_players(void);
+unsigned char get_game_state(void);
 
 #endif /* SPACETEAM_GAME_H_ */

@@ -10,6 +10,8 @@
 #include "spaceteam_display.h"
 #include "spaceteam_io.h"
 #include "spaceteam_rfid.h"
+#include "spaceteam_general.h"
+#include "spaceteam_msg.h"
 
 //
 // Define the clock frequency
@@ -63,6 +65,9 @@ int main(void) {
     
     unsigned char rfid_data[RFID_ID_LEN];
     rfid_status_t status;
+    unsigned char * players;
+    unsigned char player_idx;
+    game_state_t game_state;
 
     // Want to initialize the game
     init_game();
@@ -90,10 +95,51 @@ int main(void) {
                 init_rfid();
             }
 
-
-            // Scan for RFID roughly once per second
-            __delay_ms(1000);
         }
+
+        // If we are a wireless master, we need to also send polling messages
+        //  to everyone else in the game
+        #if (BOARDNUM == MASTER_BOARDNUM)
+        {
+            // If we are in the waiting state, then we need ot poll all players
+            game_state = get_game_state();
+
+            if (game_state == GAME_WAITING)
+            {
+                // Send messages to all possible players, except ourselves
+                for (player_idx = 1; player_idx < MAX_NUM_PLAYERS; player_idx++)
+                {
+                   send_message(MSG_NETWORKING, 0, MASTER_BOARDNUM, player_idx, 0); 
+                }
+            }
+
+            // Otherwise, just send messages to the players who we know exist
+            else
+            {
+                // Get the active players list and send a polling message to all
+                //  of them
+                players = get_active_players();
+
+                player_idx = 0;
+
+                // Loop through the active players
+                while(players[player_idx] != MAX_NUM_PLAYERS)
+                {
+                    // Make sure it's not the master
+                    if (players[player_idx != MASTER_BOARDNUM])
+                    {
+                        // Send a polling message
+                        send_message(MSG_POLL, 0, MASTER_BOARDNUM, players[player_idx], 0);
+                    }
+                }
+            }
+
+        }
+        // Otherwise, just wait for a bit
+        #else
+            __delay_ms(1000);
+        #endif
+
     };
 
     return 0;

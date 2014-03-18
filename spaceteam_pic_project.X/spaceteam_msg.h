@@ -16,6 +16,7 @@ typedef enum _spaceteam_msg_t
 	MSG_POLL,
 	MSG_HEALTH,
 	MSG_NETWORKING,
+	MSG_BEGIN,
 	NUM_MSGS
 } spaceteam_msg_t;
 
@@ -35,6 +36,7 @@ typedef struct _spaceteam_packet_t
 //
 // Function declarations
 //
-void send_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char board, unsigned val );
+void send_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sender, unsigned char recipient, unsigned val );
+void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sender, unsigned char recipient, unsigned val);
 
 #endif /* SPACETEAM_MSG_H_ */

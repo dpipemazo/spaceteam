@@ -20,7 +20,12 @@ extern "C" {
 #define FAILURE 1
 #define SUCCESS 0
 
-#define NULL
+// Need to define the board number for the board being compiled
+#define BOARDNUM 1
+
+// The master board number. So if our board is this number, then
+//	we are the master
+#define MASTER_BOARDNUM 0
 
 
 #ifdef	__cplusplus

@@ -35,6 +35,8 @@
 #include "spaceteam_display.h"
 #include "spaceteam_rfid.h"
 #include "spaceteam_io.h"
+#include "spaceteam_msg.h"
+#include "spaceteam_general.h"
 #include <stddef.h>
 
 #define FCY 8000000UL
@@ -42,15 +44,33 @@
 
 // Flag which denotes transmitting mode
 volatile unsigned char PTX;
-unsigned char pload_data[wl_module_PAYLOAD_LEN];
 
+unsigned char player_addresses[MAX_NUM_PLAYERS][wl_module_ADDR_LEN] =
+{
+	{0x12, 0x34, 0x56, 0x78, 0x9A}, // Player 0
+	{0x34, 0x56, 0x78, 0x9A, 0xBC}, // Player 1
+	{0x56, 0x78, 0x9A, 0xBC, 0xDE}, // Player 2
+	{0x78, 0x9A, 0xBC, 0xDE, 0xF0}, // Player 3
+	{0x9A, 0xBC, 0xDE, 0xF0, 0x12}, // Player 4
+	{0xBC, 0xDE, 0xF0, 0x12, 0x34}, // Player 5
+	{0xDE, 0xF0, 0x12, 0x34, 0x45}, // Player 6
+	{0xF0, 0x12, 0x34, 0x45, 0x67} 	// Player 7
+};
+
+
+// This function returns a pointer to a player's address
+//	data struct based on the player number
+unsigned char * get_player_address(unsigned char player_no)
+{
+	return &player_addresses[player_no][0];
+}
 
 //
 // This function fully resets and initializes the wireless
 //	module and sets it in PRX or PTX mode according to 
 //	whether it is a master or a slave
 //
-void init_wireless(unsigned char * address)
+void init_wireless()
 {
     // Define CSN and CE as Output and set them to default
     wl_module_CE_lo;
@@ -66,7 +86,7 @@ void init_wireless(unsigned char * address)
     wl_module_write_register_byte(STATUS, 0x70);
 
     // Set up the chip address
-    wl_module_set_address(address);
+    wl_module_set_address(get_player_address(BOARDNUM));
 
     // Set RF channel
     wl_module_write_register_byte(RF_CH, wl_module_CH);
@@ -87,13 +107,21 @@ void init_wireless(unsigned char * address)
    	//
 	// Either start the transmitter or receiver, based on master/slave 
 	//
-	#ifdef WIRELESS_MASTER
+	#if (BOARDNUM == MASTER_BOARDNUM)
 		// Setup retries
 		wl_module_write_register_byte(SETUP_RETR, (SETUP_RETR_ARD_750 | SETUP_RETR_ARC_15));
+		// Setup dynamic payload length 
+		wl_module_write_register_byte(FEATURE, 0x06);
+		// And enable it on pipe 0
+		wl_module_write_register_byte(DYNPD, 0x01);
 
 	#else
 		// Set length of incoming payload
-    	wl_module_write_register_byte(RX_PW_P0, wl_module_PAYLOAD_LEN);
+    	wl_module_write_register_byte(RX_PW_P0, SPACETEAM_PACKET_SIZE);
+		// Setup dynamic payload length and ack payloads
+		wl_module_write_register_byte(FEATURE, 0x06);
+		// And enable it on pipe 0
+		wl_module_write_register_byte(DYNPD, 0x01);
 		// Want to start up the receiver
 		RX_POWERUP;
 		// And send the chip enable high to begin listening for packets
@@ -113,7 +141,7 @@ void wl_module_set_address(unsigned char * address)
 
 	// Only configure the TX address if we are a wireless master, otherwise
 	//	it does bad things
-	#ifdef WIRELESS_MASTER
+	#if (BOARDNUM == MASTER_BOARDNUM)
 		// And write the transmit address
 		wl_module_write_register(TX_ADDR, address, wl_module_ADDR_LEN);
 	#endif
@@ -198,12 +226,12 @@ void wl_module_get_payload(unsigned char * pload)
 // Reads pload_len bytes from the RX fifo into the data array
 {
     // Send the command to read the RX payload
-    wl_module_send_command( R_RX_PAYLOAD, NULL, pload , wl_module_PAYLOAD_LEN );
+    wl_module_send_command( R_RX_PAYLOAD, NULL, pload , SPACETEAM_PACKET_SIZE );
 
 }
 
 // Send the payload out
-void wl_module_send_payload(unsigned char * pload, unsigned char * address)
+void wl_module_send_payload(unsigned char * pload)
 // Sends a data package to the default address. Be sure to send the correct
 // amount of bytes as configured as payload on the receiver.
 {
@@ -218,11 +246,18 @@ void wl_module_send_payload(unsigned char * pload, unsigned char * address)
     wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
 
     // SEnd the command to write the payload
-    wl_module_send_command(W_TX_PAYLOAD, pload, NULL, wl_module_PAYLOAD_LEN);
+    wl_module_send_command(W_TX_PAYLOAD, pload, NULL, SPACETEAM_PACKET_SIZE);
 
     // And start the transmit
     wl_module_start_transmit();
 
+}
+
+// Send a response payload to the master on pipe 0. Writes it to the TX 
+//	ACK FIFO.
+void wl_module_send_response(unsigned char * pload)
+{
+	wl_module_send_command(W_ACK_PAYLOAD, pload, NULL, SPACETEAM_PACKET_SIZE);
 }
 
 // This function toggles the CE line for 10us to begin a transmit
@@ -238,6 +273,7 @@ void _ISR _INT2Interrupt(void)
 {
 	unsigned char status;
 	unsigned char rfid_cs_val;
+	spaceteam_packet_t payload;
 
 	// Need to set chip selects
 	int_set_chip_selects();
@@ -247,18 +283,35 @@ void _ISR _INT2Interrupt(void)
 
 
     if (status & (1<<TX_DS)){ // IRQ: Package has been sent
+    	display_write_line(DISPLAY_LINE_1, "PACKET SENT");
 	    wl_module_write_register_byte(STATUS, (1<<TX_DS)); //Clear Interrupt Bit
 	    PTX=0;
     }
 
 	if (status & (1<<MAX_RT)){ // IRQ: Package has not been sent, send again
+		display_write_line(DISPLAY_LINE_1, "PACKET NOT SENT");
 		wl_module_write_register_byte(STATUS, (1<<MAX_RT));	// Clear Interrupt Bit
-		wl_module_start_transmit();
+		// We only want to retry the send if we know that it's to a module
+		//	that exists. So only retry sending if the game state is not waiting
+		if (get_game_state() != GAME_WAITING)
+		{
+			// Try to resend it, since we suppose it's going to someone who exists.
+			wl_module_start_transmit();
+		}
+		// Otherwise we need to reset PTX
+		else
+		{
+			PTX = 0;
+		}
 	}
 
 	if (status & (1<<RX_DR)){
-		wl_module_get_payload(pload_data); // And get the data
+		display_write_line(DISPLAY_LINE_1, "GOT PACKET");
+		wl_module_get_payload(&payload); // And get the data
+		// Parse the message that we got
+
 		wl_module_write_register_byte(STATUS, (1<<RX_DR)); //Clear Interrupt Bit
+
 	}
 
     // reset INT2 flag

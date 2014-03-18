@@ -8,11 +8,13 @@
 #include "spaceteam_rfid.h"
 #include "spaceteam_msg.h"
 #include "spaceteam_display.h"
+#include "spaceteam_general.h"
+#include "spaceteam_wireless.h"
 
 // Random number generator value
 unsigned lfsr;
 // Number of players in the game
-unsigned short num_players;
+unsigned num_players;
 // State that the game is in
 game_state_t game_state;
 // Time left on a given request
@@ -77,6 +79,8 @@ unsigned char isel_vals[NO_REQ] =
 		1 	  // Reed = S7
 	};
 
+unsigned char active_players[MAX_NUM_PLAYERS];
+
 // Initialize the game-related variables
 void init_game_vars(void)
 {
@@ -86,10 +90,15 @@ void init_game_vars(void)
 	game_state = GAME_WAITING;
 
 	// Loop through the active requests array and initialize them all to NO_REQ
+	//	Also set the active players array to invalid numbers
 	for (i = 0; i < MAX_NUM_PLAYERS; i++)
 	{
 		active_requests[i].type = NO_REQ;
+		active_players[i] = MAX_NUM_PLAYERS;
 	}
+
+	// Need to register ourself in the active players list though
+	active_players[0] = BOARDNUM;
 
 	// Clear out the keypress buffer
 	for (i = 0; i < MAX_KEYPRESSES; i++)
@@ -124,9 +133,13 @@ void init_game(void)
 	// Initialize the RFID
 	init_rfid();
 
-	// Initialize the wireless
-	//	commented out for now until we verify that the game works on one board
+	// // Initialize the wireless
 	// init_wireless();
+
+	// #if (BOARDNUM != MASTER_BOARDNUM)
+	// 	// Send out our networking message to the master with our board number
+	// 	send_message(MSG_NETWORKING, 0, BOARDNUM, MASTER_BOARDNUM, 0);
+	// #endif
 
 	// Initialize the timers
 	init_timer_1();
@@ -135,14 +148,19 @@ void init_game(void)
 }
 
 // Begin the game
-void begin_game(unsigned short num_boards)
+void begin_game(void)
 {
 	// Seed the LFSR with the current timer 1 count XOR'd with
 	//	the current sample from the ADC knob
 	lfsr = (TMR1 ^ get_knob_sample());
 
-	// Set the number of boards equal to the number of players
-	num_players = num_boards;
+	// Figure out how many players we have, by counting how
+	//	many valid entries we have in the active players array
+	num_players = 0;
+	while(active_players[num_players] != MAX_NUM_PLAYERS)
+	{
+		num_players++;
+	}
 
 	// Start the game state
 	game_state = GAME_STARTED;
@@ -177,21 +195,18 @@ unsigned lfsr_get_random(void)
 void generate_request(void)
 {
 	unsigned rand_val;
+	unsigned num_players;
+	unsigned short player_idx;
 
 	// Generate the random board number, request type and request value 
 	//	for the request
 	rand_val = lfsr_get_random();
-	my_req.board = rand_val % MAX_NUM_PLAYERS;
+	player_idx = rand_val % MAX_NUM_PLAYERS;
+	my_req.board = active_players[player_idx];
 
 	// Generate the request type
 	rand_val = lfsr_get_random();
 	my_req.type = rand_val % NO_REQ;
-
-	// IR seems to be broken in hardware for now...
-	if (my_req.type == IR_REQ)
-	{
-		my_req.type += 1;
-	}
 
 	// Generate the request value
 	rand_val = lfsr_get_random();
@@ -215,7 +230,7 @@ void generate_request(void)
 	}
 
 	// Send a message issuing the request
-	send_message(MSG_NEW_REQ, my_req.type, my_req.board, my_req.val);
+	send_message(MSG_NEW_REQ, my_req.type, BOARDNUM, my_req.board, my_req.val);
 
 	// Reset the request time
 	req_time = REQ_TIME_MAX;
@@ -346,24 +361,20 @@ void _ISR _T1Interrupt(void)
 			TIMER_1_INT_ENABLE = 0;
 
 			// Send a message that our request failed
-			send_message(MSG_REQ_FAILED, my_req.type, my_req.board, my_req.val);
+			send_message(MSG_REQ_FAILED, my_req.type, BOARDNUM, my_req.board, my_req.val);
 
-			// Decrement the game health
-			game_health -= 1;
-
-			// If the game is over, then re-initialize everything
-			if (game_health == 0)
+			// Decrement the game health, and if we have lost, restart the game 
+			if (dec_game_health())
+			{
+				generate_request();
+			}
+			else
 			{
 				// Restart the game
 				init_game_vars();
 				// And print a game-over statement
 				display_clear();
 				display_write_line(DISPLAY_LINE_1, "GAME OVER!");
-			}
-			// Otherwise, generate a new request
-			else
-			{
-				generate_request();
 			}
 		}
 	}
@@ -452,7 +463,7 @@ void _ISR _T2Interrupt(void)
 				if (check_request_completed(i))
 				{
 					// Send a message saying that the resuest has been completed
-					send_message(MSG_REQ_COMPLETED, active_requests[i].type, active_requests[i].board, active_requests[i].val);
+					send_message(MSG_REQ_COMPLETED, active_requests[i].type, BOARDNUM, active_requests[i].board, active_requests[i].val);
 
 					// Reallocate the message
 					active_requests[i].type = NO_REQ; 
@@ -473,8 +484,10 @@ void _ISR _T2Interrupt(void)
 		// If the begin button is debounced
 		if(is_begin_debounced())
 		{
+			// // Send a message to everyone saying that the game should start
+			// send_message(MSG_BEGIN, 0, BOARDNUM, MASTER_BOARDNUM, 0);
 			// Then start the game!
-			begin_game(1);
+			begin_game();
 		}
 	}
 
@@ -698,15 +711,90 @@ int check_knob_completed(unsigned val)
 //	on. Else, it doesn't moce the LSEL.
 void multiplex_leds(void)
 {
-	// If our LED should be on 
-	if ( (curr_LED < req_time) || ( (curr_LED >= MIN_HEALTH_LED) && (curr_LED < (game_health + MIN_HEALTH_LED)) ) )
+	// If we are playing the game
+	if (game_state == GAME_STARTED)
 	{
-		// Then turn it on
-		set_lsel(curr_LED);
+		// If our LED should be on 
+		if ( (curr_LED < req_time) || ( (curr_LED >= MIN_HEALTH_LED) && (curr_LED < (game_health + MIN_HEALTH_LED)) ) )
+		{
+			// Then turn it on
+			set_lsel(curr_LED);
+		}
+
+		// Increment by 1 and wrap around 15
+		curr_LED = (curr_LED + 1) & 0xF;
+	}
+	// If we are in the waiting state
+	else if (game_state == GAME_WAITING)
+	{
+		// If we have the current player as an active player
+		if (active_players[curr_LED] != MAX_NUM_PLAYERS)
+		{
+			// Then turn the LED on. 
+			set_lsel(curr_LED);
+		}
+
+		// Mod the LED counter by the maximum number of players
+		curr_LED = (curr_LED + 1) % MAX_NUM_PLAYERS;
 	}
 
-	// Increment by 1 and wrap around 15
-	curr_LED = (curr_LED + 1) & 0xF;
+}
+
+// this function decrements the game health by some amount. It returns 1 if the game is still
+//	going. 
+int dec_game_health(void)
+{
+	int ret_val = 1;
+
+	game_health -= 1;
+
+	// Send a decrement game health message to everyone	
+	send_message(MSG_HEALTH, 0, BOARDNUM, MASTER_BOARDNUM, 0);
+
+	// If the game is over, then re-initialize everything
+	if (game_health == 0)
+	{
+		// Want to return zero
+		ret_val = 0;
+	}
+
+	return ret_val;
+}
+
+// This function registers a player in the game
+void register_player(unsigned char player)
+{
+	int i = 0;
+	int seen_before = 0;
+
+	// Loop over the active players' array until we find a spot to put the 
+	//	player in
+	while(active_players[i] != MAX_NUM_PLAYERS)
+	{
+		i++;
+		if (active_players[i] == player)
+		{
+			seen_before = 1;
+		}
+	}
+
+	if (!seen_before)
+	{
+		// Now, put the player in
+		active_players[i] = player;
+	}
+}
+
+// This function returns a pointer to the array of active players
+unsigned char * get_active_players(void)
+{
+	return active_players;
+}
+
+// This function returns the game state
+unsigned char get_game_state(void)
+{
+	return game_state;
 }
 
 
