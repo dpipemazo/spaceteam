@@ -82,7 +82,7 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 			// If our request has been completed
 			case MSG_REQ_COMPLETED:
 				// Just generate a new request
-				generate_request();
+				// generate_request();
 				break;
 			// If it's a standard polling message from the master
 			case MSG_POLL:

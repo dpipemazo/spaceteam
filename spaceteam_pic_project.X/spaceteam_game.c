@@ -202,7 +202,8 @@ void generate_request(void)
 	//	for the request
 	rand_val = lfsr_get_random();
 	player_idx = rand_val % MAX_NUM_PLAYERS;
-	my_req.board = active_players[player_idx];
+	// my_req.board = active_players[player_idx];
+	my_req.board = BOARDNUM;
 
 	// Generate the request type
 	rand_val = lfsr_get_random();
@@ -231,6 +232,9 @@ void generate_request(void)
 
 	// Send a message issuing the request
 	send_message(MSG_NEW_REQ, my_req.type, BOARDNUM, my_req.board, my_req.val);
+
+	// And write the request
+	display_write_request(my_req.type, my_req.board, my_req.val);
 
 	// Reset the request time
 	req_time = REQ_TIME_MAX;
@@ -655,9 +659,6 @@ void set_game_rfid(unsigned char * data)
 	{	
 		rfid_buf[i] = data[i];
 	}
-
-	// Display the RFID token acquired
-	display_rfid_token(data);
 }
 
 // This function will check to see if a switch request has been completed
@@ -749,7 +750,7 @@ int dec_game_health(void)
 	game_health -= 1;
 
 	// Send a decrement game health message to everyone	
-	send_message(MSG_HEALTH, 0, BOARDNUM, MASTER_BOARDNUM, 0);
+	// send_message(MSG_HEALTH, 0, BOARDNUM, MASTER_BOARDNUM, 0);
 
 	// If the game is over, then re-initialize everything
 	if (game_health == 0)
