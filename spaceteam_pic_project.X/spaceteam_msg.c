@@ -47,7 +47,7 @@ void send_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sender
 		// If we are not the master
 		#else
 			// Then send it as a response
-			wl_module_send_response((unsigned char *)&packet_buf);
+			wl_module_send_ack((unsigned char *)&packet_buf, 0);
 		#endif
 	}
 }

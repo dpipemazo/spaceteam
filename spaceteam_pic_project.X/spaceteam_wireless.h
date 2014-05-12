@@ -41,7 +41,7 @@
 //  Comment out the define to be a slave
 //  Master is the one PTX in the group, slaves are all PRX
 // //
-#define WIRELESS_MASTER
+// #define WIRELESS_MASTER
 
 // WL-Module settings
 #define wl_module_CH			2

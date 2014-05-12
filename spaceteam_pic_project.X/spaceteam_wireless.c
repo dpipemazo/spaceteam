@@ -219,6 +219,9 @@ void wl_module_send_payload(unsigned char * pload, unsigned char * address)
     PTX = 1;                        	// Indicate that we are trying to send a packet
     TX_POWERUP;                     	// Power up
 
+    // Change the address
+    // wl_module_set_address(address);
+
     // Flush the TX FIFO
     wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
 
