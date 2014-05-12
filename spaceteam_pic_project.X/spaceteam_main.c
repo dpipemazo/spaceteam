@@ -71,21 +71,24 @@ int main(void) {
     game_state_t game_state;
     char master_payload[wl_module_PAYLOAD_LEN] = "Iron Man!";
     char slave_payload[wl_module_PAYLOAD_LEN] = "Justin Hammer!";
-    unsigned char address[wl_module_ADDR_LEN] = {0x88, 0x01, 0x02, 0x03, 0x04};
-
 
 
     // Want to initialize the game
-    // init_game();
+    init_game();
 
-    init_display();
-    init_wireless(address);
+    // Enter the waiting state for other players
+    network_with_other_players();
 
-    #ifdef WIRELESS_MASTER
-        wl_module_send_payload(master_payload, address);
-    #else
-        wl_module_send_ack(slave_payload, 0);
-    #endif
+
+
+    // init_display();
+    // init_wireless();
+
+    // #if (THIS_PLAYER == MASTER_PLAYER)
+    //     wl_module_send_payload(master_payload, PLAYER_1);
+    // #else
+    //     wl_module_send_ack(slave_payload);
+    // #endif
 
 
 

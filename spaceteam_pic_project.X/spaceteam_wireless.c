@@ -34,6 +34,8 @@
 #include "spaceteam_spi.h"
 #include "spaceteam_display.h"
 #include "spaceteam_rfid.h"
+#include "spaceteam_general.h"
+#include "spaceteam_msg.h"
 #include <stddef.h>
 
 #define FCY 8000000UL
@@ -43,13 +45,24 @@
 volatile unsigned char PTX;
 unsigned char pload_data[wl_module_PAYLOAD_LEN];
 
+// Addresses for all of the players
+unsigned char player_addresses[NUM_PLAYERS][wl_module_ADDR_LEN] =
+	{
+		{0x00, 0x01, 0x02, 0x03, 0x04},
+		{0x01, 0x02, 0x03, 0x04, 0x05},
+		{0x02, 0x03, 0x04, 0x05, 0x06},
+		{0x03, 0x04, 0x05, 0x06, 0x07},
+		{0x04, 0x05, 0x06, 0x07, 0x08}
+	};
+
+
 
 //
 // This function fully resets and initializes the wireless
 //	module and sets it in PRX or PTX mode according to 
 //	whether it is a master or a slave
 //
-void init_wireless(unsigned char * address)
+void init_wireless()
 {
 	char curr_addr[wl_module_ADDR_LEN];
 
@@ -67,7 +80,7 @@ void init_wireless(unsigned char * address)
     wl_module_write_register_byte(STATUS, 0x70);
 
     // Set up the chip address
-    wl_module_set_address(address);
+    wl_module_set_address(player_addresses[THIS_PLAYER]);
 
     // Set RF channel
     wl_module_write_register_byte(RF_CH, wl_module_CH);
@@ -92,7 +105,7 @@ void init_wireless(unsigned char * address)
    	//
 	// Either start the transmitter or receiver, based on master/slave 
 	//
-	#ifdef WIRELESS_MASTER
+	#if (THIS_PLAYER == MASTER_PLAYER)
 		// Setup retries
 		wl_module_write_register_byte(SETUP_RETR, (SETUP_RETR_ARD_4000 | SETUP_RETR_ARC_15));
 
@@ -118,7 +131,7 @@ void wl_module_set_address(unsigned char * address)
 
 	// Only configure the TX address if we are a wireless master, otherwise
 	//	it does bad things
-	#ifdef WIRELESS_MASTER
+	#if (THIS_PLAYER == MASTER_PLAYER)
 		// And write the transmit address
 		wl_module_write_register(TX_ADDR, address, wl_module_ADDR_LEN);
 	#endif
@@ -208,7 +221,7 @@ void wl_module_get_payload(unsigned char * pload)
 }
 
 // Send the payload out
-void wl_module_send_payload(unsigned char * pload, unsigned char * address)
+void wl_module_send_payload(unsigned char * pload, spaceteam_player_t player)
 // Sends a data package to the default address. Be sure to send the correct
 // amount of bytes as configured as payload on the receiver.
 {
@@ -220,7 +233,7 @@ void wl_module_send_payload(unsigned char * pload, unsigned char * address)
     TX_POWERUP;                     	// Power up
 
     // Change the address
-    // wl_module_set_address(address);
+    wl_module_set_address(player_addresses[player]);
 
     // Flush the TX FIFO
     wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
@@ -234,12 +247,12 @@ void wl_module_send_payload(unsigned char * pload, unsigned char * address)
 }
 
 // Write an ack payload
-void wl_module_send_ack(unsigned char * pload, unsigned char pipe)
+void wl_module_send_ack(unsigned char * pload)
 {
 	// Flush the TX FIFO
     wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
 	// SEnd the command to write the payload
-    wl_module_send_command(W_ACK_PAYLOAD | pipe, pload, NULL, wl_module_PAYLOAD_LEN);
+    wl_module_send_command(W_ACK_PAYLOAD, pload, NULL, wl_module_PAYLOAD_LEN);
 }
 
 // This function toggles the CE line for 10us to begin a transmit
@@ -278,7 +291,7 @@ void _ISR _INT2Interrupt(void)
 
 	if (status & (1<<RX_DR)){
 		wl_module_get_payload(pload_data); // And get the data
-		display_write_line(1, pload_data); // And write it to the display for test
+		parse_message(pload_data); // Parse the message
 		wl_module_write_register_byte(STATUS, (1<<RX_DR)); //Clear Interrupt Bit
 	}
 

@@ -24,7 +24,7 @@ void send_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sender
 	// First, see if the board that we are sending this to is our own. If so, 
 	//	just process it now and don't bother routing it through the master,
 	//	though that theoretically should work
-	if (recipient == BOARDNUM)
+	if (recipient == THIS_PLAYER)
 	{
 		parse_message(msg, req, sender, recipient, val);
 	}
@@ -39,15 +39,13 @@ void send_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sender
 
 		// if we are the wireless master, send it. Otherwise, we want to write it to our 
 		//	ACK FIFO
-		#if (BOARDNUM == MASTER_BOARDNUM)
-			// Need to change our TX address to match the RX address of the recipient
-			wl_module_set_address(get_player_address(recipient));
+		#if (THIS_PLAYER == MASTER_PLAYER)
 			// And then send the packet
-			wl_module_send_payload((unsigned char *)&packet_buf);
+			wl_module_send_payload((unsigned char *)&packet_buf, recipient);
 		// If we are not the master
 		#else
 			// Then send it as a response
-			wl_module_send_ack((unsigned char *)&packet_buf, 0);
+			wl_module_send_ack((unsigned char *)&packet_buf);
 		#endif
 	}
 }
@@ -61,7 +59,7 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 
 	// We first need to see if we should simply be forwarding this message along, as 
 	//	can happen if we are the wireless master
-	if (recipient != BOARDNUM)
+	if (recipient != THIS_PLAYER)
 	{
 		send_message(msg, req, sender, recipient, val);
 	}
@@ -93,7 +91,7 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 			//	master then we need to forward this to all boards
 			case MSG_HEALTH:
 				dec_game_health();
-				#if (BOARDNUM == MASTER_BOARDNUM)
+				#if (THIS_PLAYER == MASTER_PLAYER)
 				{
 					forward_msg = 1;
 				}
@@ -102,7 +100,7 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 			// If it's a networking request, then register the player
 			case MSG_NETWORKING:
 				register_player(sender);
-				#if (BOARDNUM == MASTER_BOARDNUM)
+				#if (THIS_PLAYER == MASTER_PLAYER)
 				{
 					forward_msg = 1;
 				}
@@ -111,7 +109,7 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 			// We need to begin the game!
 			case MSG_BEGIN:
 				begin_game();
-				#if (BOARDNUM == MASTER_BOARDNUM)
+				#if (THIS_PLAYER == MASTER_PLAYER)
 				{
 					forward_msg = 1;
 				}
@@ -128,9 +126,9 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 			// Figure out the players
 			players = get_active_players();
 			// Send message to all of them who are not the sender
-			while(players[i] != MAX_NUM_PLAYERS)
+			while(players[i] != NUM_PLAYERS)
 			{
-				if ( (players[i] != MASTER_BOARDNUM) && (players[i] != sender) )
+				if ( (players[i] != MASTER_PLAYER) && (players[i] != sender) )
 				{
 					send_message(msg, req, sender, players[i], val);
 				}

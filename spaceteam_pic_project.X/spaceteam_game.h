@@ -5,9 +5,6 @@
 #ifndef SPACETEAM_GAME_H_
 #define SPACETEAM_GAME_H_
 
-// The maximum number of players
-#define MAX_NUM_PLAYERS	8
-
 // The maximum number of keys which can be entered
 #define MAX_KEYPRESSES  4
 
@@ -22,7 +19,6 @@
 typedef enum _spaceteam_req_t
 {
 	KEYPAD_REQ,
-	RFID_REQ,
 	KNOB_REQ,
 	PB1_REQ, // S1
 	PB2_REQ, // S4
@@ -83,6 +79,7 @@ typedef struct _spaceteam_request
 // Different states that the game can be in
 typedef enum _game_state_t
 {
+	GAME_INIT,
 	GAME_WAITING,
 	GAME_STARTED,
 	GAME_OVER

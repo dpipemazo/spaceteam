@@ -5,7 +5,6 @@
 #include "xc.h"
 #include "spaceteam_game.h"
 #include "spaceteam_io.h"
-#include "spaceteam_rfid.h"
 #include "spaceteam_msg.h"
 #include "spaceteam_display.h"
 #include "spaceteam_general.h"
@@ -25,46 +24,18 @@ unsigned char curr_LED;
 unsigned char game_health;
 
 // Active requests array
-spaceteam_request_t active_requests[MAX_NUM_PLAYERS];
+spaceteam_request_t active_requests[NUM_PLAYERS];
 // Our request
 spaceteam_request_t my_req;
 
-// Whether or not we should be doing RFID scans in the mainloop
-unsigned char mainloop_scan_for_rfid;
-
 // Buffer which holds keypresses
 unsigned char key_buf[MAX_KEYPRESSES];
-
-// Buffer which holds RFID values
-unsigned char rfid_buf[RFID_ID_LEN];
-
-// Table of possible RFID tokens
-unsigned char rfid_tokens[NUM_RFID_TOKENS][RFID_ID_LEN] =
-	{
-		{0xF5, 0x02, 0x9D, 0xE2}, // Token 1
-		{0x85, 0xB9, 0x3B, 0xE3}, // Token 2
-		{0xF4, 0x83, 0x97, 0x5B}, // Token 3
-		{0x44, 0x81, 0x97, 0x5B}, // Token 4
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 5
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 6
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 7
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 8
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 9
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 10
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 11
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 12
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 13
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 14
-		{0xAA, 0xAA, 0xAA, 0xAA}, // Token 15
-		{0xAA, 0xAA, 0xAA, 0xAA} // Token 16
-	};
 
 // Table of LSEL values based off of request type. This is only applicable for
 //	switch type requests
 unsigned char isel_vals[NO_REQ] = 
 	{
 		0xFF, // Keypad doesn't need a LSEL value
-		0xFF, // RFID doesn't need a LSEL value
 		0xFF, // Knob doesn't need a LSEL value
 		11,   // PB1 = S1
 		2, 	  // PB2 = S4
@@ -87,18 +58,18 @@ void init_game_vars(void)
 	int i;
 
 	// Just set the game state to waiting
-	game_state = GAME_WAITING;
+	game_state = GAME_INIT;
 
 	// Loop through the active requests array and initialize them all to NO_REQ
 	//	Also set the active players array to invalid numbers
-	for (i = 0; i < MAX_NUM_PLAYERS; i++)
+	for (i = 0; i < NUM_PLAYERS; i++)
 	{
 		active_requests[i].type = NO_REQ;
-		active_players[i] = MAX_NUM_PLAYERS;
+		active_players[i] = NUM_PLAYERS;
 	}
 
 	// Need to register ourself in the active players list though
-	active_players[0] = BOARDNUM;
+	active_players[0] = THIS_PLAYER;
 
 	// Clear out the keypress buffer
 	for (i = 0; i < MAX_KEYPRESSES; i++)
@@ -106,8 +77,6 @@ void init_game_vars(void)
 		key_buf[i] = 0;
 	}
 
-	// We should not be doing mainloop RFID scans
-	mainloop_scan_for_rfid = 0;
 }
 
 // Initialize the game. 
@@ -130,20 +99,47 @@ void init_game(void)
 	display_write_line(DISPLAY_LINE_1, "Welcome to Spaceteam!");
 	display_write_line(DISPLAY_LINE_2, "Waiting for other players...");
 
-	// Initialize the RFID
-	init_rfid();
-
-	// // Initialize the wireless
-	// init_wireless();
-
-	// #if (BOARDNUM != MASTER_BOARDNUM)
-	// 	// Send out our networking message to the master with our board number
-	// 	send_message(MSG_NETWORKING, 0, BOARDNUM, MASTER_BOARDNUM, 0);
-	// #endif
+	// Initialize the wireless
+	init_wireless();
 
 	// Initialize the timers
 	init_timer_1();
 	init_timer_2();
+
+}
+
+// This function essentially implements the waiting room for the game, 
+//	allowing other players to network
+void network_with_other_players()
+{
+	int i;
+
+	while (has_game_begun() == false)
+	{
+
+		// There are two cases for this function, one if we are the master, one if we are not
+		#if (THIS_PLAYER == MASTER_PLAYER)
+
+			// If we are the master, we need to send our networking message to all other players
+			for (i = 1; i < NUM_PLAYERS; i++)
+			{
+				// Send a networking message to the player, if they exist
+				send_message(MSG_NETWORKING, 0, THIS_PLAYER, i, 0);
+				__delay_ms(100);
+			}
+
+		// If we are not the master player, we only want to send the ack once, 
+		#else
+			if (game_state == GAME_INIT)
+			{
+				send_message(MSG_NETWORKING, 0, THIS_PLAYER, MASTER_PLAYER, 0);
+			}
+			__delay_ms(100);
+		#endif
+
+	}
+
+	return (game_state == GAME_BEGIN)
 
 }
 
@@ -203,7 +199,7 @@ void generate_request(void)
 	rand_val = lfsr_get_random();
 	player_idx = rand_val % MAX_NUM_PLAYERS;
 	// my_req.board = active_players[player_idx];
-	my_req.board = BOARDNUM;
+	my_req.board = THIS_PLAYER;
 
 	// Generate the request type
 	rand_val = lfsr_get_random();
@@ -220,9 +216,6 @@ void generate_request(void)
 		case KNOB_REQ:
 			my_req.val = rand_val % NUM_KNOB_VALS;
 			break;
-		case RFID_REQ:
-			my_req.val = rand_val % NUM_RFID_REQS;
-			break;
 		default:
 			// For switches, it's always a toggle
 			//	from the current state
@@ -231,7 +224,7 @@ void generate_request(void)
 	}
 
 	// Send a message issuing the request
-	send_message(MSG_NEW_REQ, my_req.type, BOARDNUM, my_req.board, my_req.val);
+	send_message(MSG_NEW_REQ, my_req.type, THIS_PLAYER, my_req.board, my_req.val);
 
 	// And write the request
 	display_write_request(my_req.type, my_req.board, my_req.val);
@@ -365,7 +358,7 @@ void _ISR _T1Interrupt(void)
 			TIMER_1_INT_ENABLE = 0;
 
 			// Send a message that our request failed
-			send_message(MSG_REQ_FAILED, my_req.type, BOARDNUM, my_req.board, my_req.val);
+			send_message(MSG_REQ_FAILED, my_req.type, THIS_PLAYER, my_req.board, my_req.val);
 
 			// Decrement the game health, and if we have lost, restart the game 
 			if (dec_game_health())
@@ -467,7 +460,7 @@ void _ISR _T2Interrupt(void)
 				if (check_request_completed(i))
 				{
 					// Send a message saying that the resuest has been completed
-					send_message(MSG_REQ_COMPLETED, active_requests[i].type, BOARDNUM, active_requests[i].board, active_requests[i].val);
+					send_message(MSG_REQ_COMPLETED, active_requests[i].type, THIS_PLAYER, active_requests[i].board, active_requests[i].val);
 
 					// Reallocate the message
 					active_requests[i].type = NO_REQ; 
@@ -489,7 +482,7 @@ void _ISR _T2Interrupt(void)
 		if(is_begin_debounced())
 		{
 			// // Send a message to everyone saying that the game should start
-			// send_message(MSG_BEGIN, 0, BOARDNUM, MASTER_BOARDNUM, 0);
+			// send_message(MSG_BEGIN, 0, THIS_PLAYER, MASTER_THIS_PLAYER, 0);
 			// Then start the game!
 			begin_game();
 		}
@@ -517,9 +510,6 @@ int check_request_completed(int req_no)
 	{
 		case KEYPAD_REQ:
 			ret_val = check_keypad_completed(active_requests[req_no].val);
-			break;
-		case RFID_REQ:
-			ret_val = check_rfid_completed(active_requests[req_no].val);
 			break;
 		case KNOB_REQ:
 			ret_val = check_knob_completed(active_requests[req_no].val);
@@ -604,62 +594,6 @@ int check_keypad_completed(unsigned val)
 	return ret_val;
 }
 
-// This function will check to see if an RFID request has been completed
-int check_rfid_completed(unsigned val)
-{
-	unsigned char rfid_data[RFID_ID_LEN];
-	int i;
-	int ret_val = 0;
-	int successes = 0;
-
-	// Set the flag that we should be doing RFID scans in the mainloop
-	mainloop_scan_for_rfid = 1;
-
-	// Check the rfid_buffer
-	for (i = 0; i < RFID_ID_LEN; i++)
-	{
-		if (rfid_buf[i] == rfid_tokens[val][i])
-		{
-			successes++;
-		}
-	}
-
-	// If we have RFID_ID_LEN successes, then we have the correct value
-	if (successes == RFID_ID_LEN)
-	{
-		ret_val = 1;
-		// And want to clear the internal RFID buffer
-		for (i = 0; i < RFID_ID_LEN; i++)
-		{
-			rfid_buf[i] = 0;
-		}
-		// And also want to turn off scanning in the mainloop
-		mainloop_scan_for_rfid = 0;
-		// And finally, want to clear the second line of the display
-		//	which should be showing an RFID token
-		display_clear_line(DISPLAY_LINE_2);
-	} 
-
-	return ret_val;
-}
-
-// This function tells the mainloop whether or not it should be scanning for RFID values
-int scan_for_rfid(void)
-{	
-	return mainloop_scan_for_rfid;
-}
-
-// This function takes an RFID value found by the mainloop and 
-//	writes it to our internal RFID buffer
-void set_game_rfid(unsigned char * data)
-{
-	int i;
-
-	for (i = 0; i < RFID_ID_LEN; i++)
-	{	
-		rfid_buf[i] = data[i];
-	}
-}
 
 // This function will check to see if a switch request has been completed
 int check_switch_completed(int req_no)
@@ -750,7 +684,7 @@ int dec_game_health(void)
 	game_health -= 1;
 
 	// Send a decrement game health message to everyone	
-	// send_message(MSG_HEALTH, 0, BOARDNUM, MASTER_BOARDNUM, 0);
+	// send_message(MSG_HEALTH, 0, THIS_PLAYER, MASTER_THIS_PLAYER, 0);
 
 	// If the game is over, then re-initialize everything
 	if (game_health == 0)

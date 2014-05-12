@@ -17,16 +17,22 @@ extern "C" {
 // Return Codes
 //
 
+typedef enum _spaceteam_player_t
+{
+	PLAYER_0,
+	PLAYER_1,
+	PLAYER_2,
+	PLAYER_3,
+	PLAYER_4,
+	NUM_PLAYERS
+} spaceteam_player_t;
+
+#define MASTER_PLAYER 0
+#define THIS_PLAYER	1
+#define NUM_PLAYERS 5
+
 #define FAILURE 1
 #define SUCCESS 0
-
-// Need to define the board number for the board being compiled
-#define BOARDNUM 1
-
-// The master board number. So if our board is this number, then
-//	we are the master
-#define MASTER_BOARDNUM 0
-
 
 #ifdef	__cplusplus
 }
