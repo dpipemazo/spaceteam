@@ -36,6 +36,13 @@
 #include "spi.h"
 #include "nrf24l01.h"
 
+//
+// CHANGE THIS TO CHANGE FROM WIRELESS MASTER TO SLAVE
+//  Comment out the define to be a slave
+//  Master is the one PTX in the group, slaves are all PRX
+// //
+#define WIRELESS_MASTER
+
 // WL-Module settings
 #define wl_module_CH			2
 #define wl_module_PAYLOAD_LEN	16
@@ -66,7 +73,7 @@
 #define RX_POWERUP wl_module_write_register_byte(CONFIG, wl_module_CONFIG | ( (1<<PWR_UP) | (1<<PRIM_RX) ) )
 
 // Function declarations
-void init_wireless(void);
+void init_wireless(unsigned char * address);
 void wl_module_set_address(unsigned char * address);
 unsigned char wl_module_get_status(void);
 void wl_module_send_command(unsigned char command, unsigned char * datain, unsigned char * dataout, unsigned char data_len);
@@ -75,9 +82,8 @@ unsigned char wl_module_read_register_byte(unsigned char reg);
 void wl_module_write_register(unsigned char reg, unsigned char * value, unsigned char len);
 void wl_module_write_register_byte(unsigned char reg, unsigned char value);
 void wl_module_get_payload(unsigned char * pload);
-void wl_module_send_payload(unsigned char * pload);
+void wl_module_send_payload(unsigned char * pload, unsigned char * address);
 void wl_module_start_transmit(void);
-unsigned char * get_player_address(unsigned char player_no);
-void register_player(unsigned char player);
+void wl_module_send_ack(unsigned char * pload, unsigned char pipe);
 
 #endif /* _WL_MODULE_H_ */
