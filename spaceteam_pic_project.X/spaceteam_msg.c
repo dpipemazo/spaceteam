@@ -53,8 +53,11 @@ void send_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sender
 void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sender, unsigned char recipient, unsigned val)
 {
 	unsigned char * players;
-	int forward_msg = 0;
 	int i = 0;
+
+	#if (THIS_PLAYER == MASTER_PLAYER)
+		char forward_msg = 0;
+	#endif
 
 	// // We first need to see if we should simply be forwarding this message along, as 
 	// //	can happen if we are the wireless master
@@ -94,6 +97,9 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 			// If it's a networking request, then register the player
 			case MSG_NETWORKING:
 				register_player(sender);
+				#if (THIS_PLAYER == MASTER_PLAYER)
+					forward_msg = 1;
+				#endif
 				break;
 			// We need to begin the game!
 			case MSG_BEGIN:
@@ -105,19 +111,21 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 
 		// If we need to forward the message out to all of the other boards, 
 		//	the figure out which players are present and send the message to them
-		// if (forward_msg)
-		// {
-		// 	// Figure out the players
-		// 	players = get_active_players();
-		// 	// Send message to all of them who are not the sender
-		// 	for (i = 0; i < NUM_PLAYERS; i++)
-		// 	{
-		// 		if ( (i != MASTER_PLAYER) && (i != sender) && (players[i] == PLAYER_PLAYING) )
-		// 		{
-		// 			send_message(msg, req, sender, i, val);
-		// 		}
-		// 	}
-		// }
+		#if (THIS_PLAYER == MASTER_PLAYER)
+			if (forward_msg)
+			{
+				// Figure out the players
+				players = get_active_players();
+				// Send message to all of them who are not the sender
+				for (i = 0; i < NUM_PLAYERS; i++)
+				{
+					if ( (i != MASTER_PLAYER) && (i != sender) && (players[i] == PLAYER_PLAYING) )
+					{
+						send_message(msg, req, sender, i, val);
+					}
+				}
+			}
+		#endif
 	}
 
 }

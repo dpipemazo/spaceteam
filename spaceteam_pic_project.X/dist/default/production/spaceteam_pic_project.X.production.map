@@ -66,13 +66,13 @@ Program Memory  [Origin = 0x200, Length = 0x29fe]
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200                0x98            0xe4  (228)
-.const                       0x298               0x154           0x1fe  (510)
-.text                        0x3ec              0x156a          0x201f  (8223)
-.dinit                      0x1956                0x7e            0xbd  (189)
-.text                       0x19d4                0x2e            0x45  (69)
-.init.delay32               0x1a02                0x1c            0x2a  (42)
+.const                       0x298               0x138           0x1d4  (468)
+.text                        0x3d0              0x15a4          0x2076  (8310)
+.dinit                      0x1974                0x7e            0xbd  (189)
+.text                       0x19f2                0x2e            0x45  (69)
+.init.delay32               0x1a20                0x1c            0x2a  (42)
 
-                     Total program memory used (bytes):         0x242d  (9261) 57%
+                     Total program memory used (bytes):         0x245a  (9306) 57%
 
 
 Data Memory  [Origin = 0x800, Length = 0x400]
@@ -168,8 +168,8 @@ External Symbols in Program Memory (by address):
 
                   0x000200                  __resetPRI
                   0x000226                  __psv_init
-                  0x000236                  __data_init
                   0x000236                  __data_init_standard
+                  0x000236                  __data_init
                   0x000294                  __DefaultInterrupt
                   0x000298                  _req_randomize
                   0x0002a2                  _req_set
@@ -201,162 +201,162 @@ External Symbols in Program Memory (by address):
                   0x000364                  _req_ship
                   0x00036e                  _req_for
                   0x000372                  _req_to
-                  0x0003e0                  _key_map
-                  0x0003ec                  _init_game_vars
-                  0x00043a                  _init_game
-                  0x000464                  _network_with_other_players
-                  0x0004a0                  _begin_game
-                  0x0004d8                  _lfsr_get_random
-                  0x000504                  _generate_request
-                  0x0005ae                  _register_request
-                  0x000640                  _deregister_request
-                  0x00069a                  _request_done
-                  0x0006a4                  _init_timer_1
-                  0x0006c4                  __T1Interrupt
-                  0x000732                  _init_timer_2
-                  0x000754                  _is_begin_debounced
-                  0x000790                  __T2Interrupt
-                  0x000838                  _check_request_completed
-                  0x000892                  _check_keypad_completed
-                  0x000958                  _check_switch_completed
-                  0x0009ca                  _check_knob_completed
-                  0x0009f8                  _multiplex_leds
-                  0x000a78                  _dec_game_health
-                  0x000a9c                  _register_player
-                  0x000ab0                  _get_active_players
-                  0x000aba                  _get_game_state
-                  0x000ac6                  _init_display
-                  0x000b24                  _init_timer_4
-                  0x000b44                  __T4Interrupt
-                  0x000bc6                  _display_line_buf
-                  0x000c6e                  _display_set_control_sigs
-                  0x000c88                  _display_write_command
-                  0x000ca6                  _display_write_char
-                  0x000cd0                  _hex_to_string
-                  0x000d38                  _display_write_hex
-                  0x000d4e                  _display_reset
-                  0x000d82                  _display_set_address
-                  0x000d98                  _display_write_line
-                  0x000dea                  _display_clear
-                  0x000dfa                  _dec_to_string
-                  0x000e5c                  _display_write_request
-                  0x000f20                  _display_set_buffer
-                  0x000f46                  _display_clear_line
-                  0x000f72                  _display_copy_string
-                  0x000fbc                  _display_scroll_set
-                  0x000fe2                  _display_key_buf
-                  0x00106c                  _display_rfid_token
-                  0x0010b2                  _init_rfid
-                  0x001116                  _rfid_write_reg
-                  0x00113c                  _rfid_read_reg
-                  0x001164                  _rfid_set_bits
-                  0x001180                  _rfid_clear_bits
-                  0x0011a0                  _rfid_transcieve
-                  0x0012ac                  _rfid_request_type
-                  0x0012e4                  _rfid_request_id
-                  0x00135e                  _rfid_get_token
-                  0x0013ac                  _init_wireless
-                  0x001406                  _wl_module_set_address
-                  0x00141e                  _wl_module_get_status
-                  0x001434                  _wl_module_send_command
-                  0x001452                  _wl_module_read_register
-                  0x00146c                  _wl_module_read_register_byte
-                  0x001480                  _wl_module_write_register
-                  0x00149e                  _wl_module_write_register_byte
-                  0x0014b4                  _wl_module_get_payload
-                  0x0014c6                  _wl_module_send_payload
-                  0x0014f2                  _wl_module_send_ack
-                  0x00150e                  _wl_module_start_transmit
-                  0x00151e                  __INT2Interrupt
-                  0x0015cc                  _init_io
-                  0x001600                  _is_io_initialized
-                  0x00160a                  _set_isel
-                  0x00162a                  _get_switch_val
-                  0x001642                  _set_lsel
-                  0x001660                  _get_iomux
-                  0x001676                  _init_keypad
-                  0x0016ac                  _scan_and_debounce_keypad
-                  0x001778                  _get_knob_sample
-                  0x001796                  _int_set_chip_selects
-                  0x0017b4                  _int_reset_chip_selects
-                  0x0017e6                  _init_spi
-                  0x001802                  __spi_write
-                  0x001838                  _spi_write
-                  0x00184a                  _is_spi_initialized
-                  0x001858                  _spi_write_multiple
-                  0x0018ac                  _send_message
-                  0x0018f8                  _parse_message
-                  0x0019d4                  _main
-                  0x001a02                  ___delay32
+                  0x0003c4                  _key_map
+                  0x0003d0                  _init_game_vars
+                  0x00041e                  _init_game
+                  0x000448                  _network_with_other_players
+                  0x000484                  _begin_game
+                  0x0004bc                  _lfsr_get_random
+                  0x0004e8                  _generate_request
+                  0x000592                  _register_request
+                  0x000624                  _deregister_request
+                  0x00067e                  _request_done
+                  0x000688                  _init_timer_1
+                  0x0006a8                  __T1Interrupt
+                  0x000716                  _init_timer_2
+                  0x000738                  _is_begin_debounced
+                  0x000774                  __T2Interrupt
+                  0x00081c                  _check_request_completed
+                  0x000876                  _check_keypad_completed
+                  0x00093c                  _check_switch_completed
+                  0x0009ae                  _check_knob_completed
+                  0x0009dc                  _multiplex_leds
+                  0x000a5c                  _dec_game_health
+                  0x000a80                  _register_player
+                  0x000a94                  _get_active_players
+                  0x000a9e                  _get_game_state
+                  0x000aaa                  _init_display
+                  0x000b08                  _init_timer_4
+                  0x000b28                  __T4Interrupt
+                  0x000baa                  _display_line_buf
+                  0x000c52                  _display_set_control_sigs
+                  0x000c6c                  _display_write_command
+                  0x000c8a                  _display_write_char
+                  0x000cb4                  _hex_to_string
+                  0x000d1c                  _display_write_hex
+                  0x000d32                  _display_reset
+                  0x000d66                  _display_set_address
+                  0x000d7c                  _display_write_line
+                  0x000dce                  _display_clear
+                  0x000dde                  _dec_to_string
+                  0x000e40                  _display_write_request
+                  0x000f04                  _display_set_buffer
+                  0x000f2a                  _display_clear_line
+                  0x000f56                  _display_copy_string
+                  0x000fa0                  _display_scroll_set
+                  0x000fc6                  _display_key_buf
+                  0x001050                  _display_rfid_token
+                  0x001096                  _init_rfid
+                  0x0010fa                  _rfid_write_reg
+                  0x001120                  _rfid_read_reg
+                  0x001148                  _rfid_set_bits
+                  0x001164                  _rfid_clear_bits
+                  0x001184                  _rfid_transcieve
+                  0x001290                  _rfid_request_type
+                  0x0012c8                  _rfid_request_id
+                  0x001342                  _rfid_get_token
+                  0x001390                  _init_io
+                  0x0013c4                  _is_io_initialized
+                  0x0013ce                  _set_isel
+                  0x0013ee                  _get_switch_val
+                  0x001406                  _set_lsel
+                  0x001424                  _get_iomux
+                  0x00143a                  _init_keypad
+                  0x001470                  _scan_and_debounce_keypad
+                  0x00153c                  _get_knob_sample
+                  0x00155a                  _int_set_chip_selects
+                  0x001578                  _int_reset_chip_selects
+                  0x0015aa                  _init_wireless
+                  0x001604                  _wl_module_set_address
+                  0x00161c                  _wl_module_get_status
+                  0x001632                  _wl_module_send_command
+                  0x001650                  _wl_module_read_register
+                  0x00166a                  _wl_module_read_register_byte
+                  0x00167e                  _wl_module_write_register
+                  0x00169c                  _wl_module_write_register_byte
+                  0x0016b2                  _wl_module_get_payload
+                  0x0016c4                  _wl_module_send_payload
+                  0x0016f0                  _wl_module_send_ack
+                  0x00170c                  _wl_module_start_transmit
+                  0x00171c                  __INT2Interrupt
+                  0x0017bc                  _send_message
+                  0x001808                  _parse_message
+                  0x0018ae                  _init_spi
+                  0x0018ca                  __spi_write
+                  0x001900                  _spi_write
+                  0x001912                  _is_spi_initialized
+                  0x001920                  _spi_write_multiple
+                  0x0019f2                  _main
+                  0x001a20                  ___delay32
 
 External Symbols in Program Memory (by name):
 
                   0x000294                  __DefaultInterrupt
-                  0x00151e                  __INT2Interrupt
-                  0x0006c4                  __T1Interrupt
-                  0x000790                  __T2Interrupt
-                  0x000b44                  __T4Interrupt
-                  0x001a02                  ___delay32
+                  0x00171c                  __INT2Interrupt
+                  0x0006a8                  __T1Interrupt
+                  0x000774                  __T2Interrupt
+                  0x000b28                  __T4Interrupt
+                  0x001a20                  ___delay32
                   0x000236                  __data_init
                   0x000236                  __data_init_standard
                   0x000226                  __psv_init
                   0x000200                  __resetPRI
-                  0x001802                  __spi_write
-                  0x0004a0                  _begin_game
-                  0x000892                  _check_keypad_completed
-                  0x0009ca                  _check_knob_completed
-                  0x000838                  _check_request_completed
-                  0x000958                  _check_switch_completed
-                  0x000a78                  _dec_game_health
-                  0x000dfa                  _dec_to_string
-                  0x000640                  _deregister_request
-                  0x000dea                  _display_clear
-                  0x000f46                  _display_clear_line
-                  0x000f72                  _display_copy_string
-                  0x000fe2                  _display_key_buf
-                  0x000bc6                  _display_line_buf
-                  0x000d4e                  _display_reset
-                  0x00106c                  _display_rfid_token
-                  0x000fbc                  _display_scroll_set
-                  0x000d82                  _display_set_address
-                  0x000f20                  _display_set_buffer
-                  0x000c6e                  _display_set_control_sigs
-                  0x000ca6                  _display_write_char
-                  0x000c88                  _display_write_command
-                  0x000d38                  _display_write_hex
-                  0x000d98                  _display_write_line
-                  0x000e5c                  _display_write_request
-                  0x000504                  _generate_request
-                  0x000ab0                  _get_active_players
-                  0x000aba                  _get_game_state
-                  0x001660                  _get_iomux
-                  0x001778                  _get_knob_sample
-                  0x00162a                  _get_switch_val
-                  0x000cd0                  _hex_to_string
-                  0x000ac6                  _init_display
-                  0x00043a                  _init_game
-                  0x0003ec                  _init_game_vars
-                  0x0015cc                  _init_io
-                  0x001676                  _init_keypad
-                  0x0010b2                  _init_rfid
-                  0x0017e6                  _init_spi
-                  0x0006a4                  _init_timer_1
-                  0x000732                  _init_timer_2
-                  0x000b24                  _init_timer_4
-                  0x0013ac                  _init_wireless
-                  0x0017b4                  _int_reset_chip_selects
-                  0x001796                  _int_set_chip_selects
-                  0x000754                  _is_begin_debounced
-                  0x001600                  _is_io_initialized
-                  0x00184a                  _is_spi_initialized
-                  0x0003e0                  _key_map
-                  0x0004d8                  _lfsr_get_random
-                  0x0019d4                  _main
-                  0x0009f8                  _multiplex_leds
-                  0x000464                  _network_with_other_players
-                  0x0018f8                  _parse_message
-                  0x000a9c                  _register_player
-                  0x0005ae                  _register_request
+                  0x0018ca                  __spi_write
+                  0x000484                  _begin_game
+                  0x000876                  _check_keypad_completed
+                  0x0009ae                  _check_knob_completed
+                  0x00081c                  _check_request_completed
+                  0x00093c                  _check_switch_completed
+                  0x000a5c                  _dec_game_health
+                  0x000dde                  _dec_to_string
+                  0x000624                  _deregister_request
+                  0x000dce                  _display_clear
+                  0x000f2a                  _display_clear_line
+                  0x000f56                  _display_copy_string
+                  0x000fc6                  _display_key_buf
+                  0x000baa                  _display_line_buf
+                  0x000d32                  _display_reset
+                  0x001050                  _display_rfid_token
+                  0x000fa0                  _display_scroll_set
+                  0x000d66                  _display_set_address
+                  0x000f04                  _display_set_buffer
+                  0x000c52                  _display_set_control_sigs
+                  0x000c8a                  _display_write_char
+                  0x000c6c                  _display_write_command
+                  0x000d1c                  _display_write_hex
+                  0x000d7c                  _display_write_line
+                  0x000e40                  _display_write_request
+                  0x0004e8                  _generate_request
+                  0x000a94                  _get_active_players
+                  0x000a9e                  _get_game_state
+                  0x001424                  _get_iomux
+                  0x00153c                  _get_knob_sample
+                  0x0013ee                  _get_switch_val
+                  0x000cb4                  _hex_to_string
+                  0x000aaa                  _init_display
+                  0x00041e                  _init_game
+                  0x0003d0                  _init_game_vars
+                  0x001390                  _init_io
+                  0x00143a                  _init_keypad
+                  0x001096                  _init_rfid
+                  0x0018ae                  _init_spi
+                  0x000688                  _init_timer_1
+                  0x000716                  _init_timer_2
+                  0x000b08                  _init_timer_4
+                  0x0015aa                  _init_wireless
+                  0x001578                  _int_reset_chip_selects
+                  0x00155a                  _int_set_chip_selects
+                  0x000738                  _is_begin_debounced
+                  0x0013c4                  _is_io_initialized
+                  0x001912                  _is_spi_initialized
+                  0x0003c4                  _key_map
+                  0x0004bc                  _lfsr_get_random
+                  0x0019f2                  _main
+                  0x0009dc                  _multiplex_leds
+                  0x000448                  _network_with_other_players
+                  0x001808                  _parse_message
+                  0x000a80                  _register_player
+                  0x000592                  _register_request
                   0x0002f8                  _req_airbag
                   0x0002ec                  _req_align
                   0x0002f2                  _req_badge
@@ -387,32 +387,32 @@ External Symbols in Program Memory (by name):
                   0x000372                  _req_to
                   0x000308                  _req_vaporizer
                   0x0002db                  _req_vent
-                  0x00069a                  _request_done
-                  0x001180                  _rfid_clear_bits
-                  0x00135e                  _rfid_get_token
-                  0x00113c                  _rfid_read_reg
-                  0x0012e4                  _rfid_request_id
-                  0x0012ac                  _rfid_request_type
-                  0x001164                  _rfid_set_bits
-                  0x0011a0                  _rfid_transcieve
-                  0x001116                  _rfid_write_reg
-                  0x0016ac                  _scan_and_debounce_keypad
-                  0x0018ac                  _send_message
-                  0x00160a                  _set_isel
-                  0x001642                  _set_lsel
-                  0x001838                  _spi_write
-                  0x001858                  _spi_write_multiple
-                  0x0014b4                  _wl_module_get_payload
-                  0x00141e                  _wl_module_get_status
-                  0x001452                  _wl_module_read_register
-                  0x00146c                  _wl_module_read_register_byte
-                  0x0014f2                  _wl_module_send_ack
-                  0x001434                  _wl_module_send_command
-                  0x0014c6                  _wl_module_send_payload
-                  0x001406                  _wl_module_set_address
-                  0x00150e                  _wl_module_start_transmit
-                  0x001480                  _wl_module_write_register
-                  0x00149e                  _wl_module_write_register_byte
+                  0x00067e                  _request_done
+                  0x001164                  _rfid_clear_bits
+                  0x001342                  _rfid_get_token
+                  0x001120                  _rfid_read_reg
+                  0x0012c8                  _rfid_request_id
+                  0x001290                  _rfid_request_type
+                  0x001148                  _rfid_set_bits
+                  0x001184                  _rfid_transcieve
+                  0x0010fa                  _rfid_write_reg
+                  0x001470                  _scan_and_debounce_keypad
+                  0x0017bc                  _send_message
+                  0x0013ce                  _set_isel
+                  0x001406                  _set_lsel
+                  0x001900                  _spi_write
+                  0x001920                  _spi_write_multiple
+                  0x0016b2                  _wl_module_get_payload
+                  0x00161c                  _wl_module_get_status
+                  0x001650                  _wl_module_read_register
+                  0x00166a                  _wl_module_read_register_byte
+                  0x0016f0                  _wl_module_send_ack
+                  0x001632                  _wl_module_send_command
+                  0x0016c4                  _wl_module_send_payload
+                  0x001604                  _wl_module_set_address
+                  0x00170c                  _wl_module_start_transmit
+                  0x00167e                  _wl_module_write_register
+                  0x00169c                  _wl_module_write_register_byte
 
 Memory Configuration
 
@@ -512,7 +512,7 @@ __FICD
 .comment
  *(.comment)
 
-.debug_info       0x000000       0x52fc
+.debug_info       0x000000       0x52ff
  *(.debug_info)
  .debug_info      0x000000        0x300 build/default/production/spaceteam_main.o
  .debug_info      0x000300        0xbcd build/default/production/spaceteam_io.o
@@ -521,10 +521,10 @@ __FICD
  .debug_info      0x00287c        0x657 build/default/production/spaceteam_rfid.o
  .debug_info      0x002ed3        0xf01 build/default/production/spaceteam_wireless.o
  .debug_info      0x003dd4       0x108b build/default/production/spaceteam_game.o
- .debug_info      0x004e5f        0x49d build/default/production/spaceteam_msg.o
+ .debug_info      0x004e5f        0x4a0 build/default/production/spaceteam_msg.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev     0x000000        0xbb3
+.debug_abbrev     0x000000        0xba6
  *(.debug_abbrev)
  .debug_abbrev    0x000000         0x9b build/default/production/spaceteam_main.o
  .debug_abbrev    0x00009b        0x19e build/default/production/spaceteam_io.o
@@ -533,18 +533,18 @@ __FICD
  .debug_abbrev    0x000558        0x14b build/default/production/spaceteam_rfid.o
  .debug_abbrev    0x0006a3        0x1d2 build/default/production/spaceteam_wireless.o
  .debug_abbrev    0x000875        0x251 build/default/production/spaceteam_game.o
- .debug_abbrev    0x000ac6         0xed build/default/production/spaceteam_msg.o
+ .debug_abbrev    0x000ac6         0xe0 build/default/production/spaceteam_msg.o
 
-.debug_line       0x000000       0x2177
+.debug_line       0x000000       0x2197
  *(.debug_line)
  .debug_line      0x000000         0xa2 build/default/production/spaceteam_main.o
  .debug_line      0x0000a2        0x3a7 build/default/production/spaceteam_io.o
  .debug_line      0x000449        0x856 build/default/production/spaceteam_display.o
  .debug_line      0x000c9f        0x1d6 build/default/production/spaceteam_spi.o
  .debug_line      0x000e75        0x467 build/default/production/spaceteam_rfid.o
- .debug_line      0x0012dc        0x408 build/default/production/spaceteam_wireless.o
- .debug_line      0x0016e4        0x947 build/default/production/spaceteam_game.o
- .debug_line      0x00202b        0x14c build/default/production/spaceteam_msg.o
+ .debug_line      0x0012dc        0x3f0 build/default/production/spaceteam_wireless.o
+ .debug_line      0x0016cc        0x947 build/default/production/spaceteam_game.o
+ .debug_line      0x002013        0x184 build/default/production/spaceteam_msg.o
 
 .debug_frame      0x000000        0x5f0
  *(.debug_frame)
@@ -627,11 +627,11 @@ __FICD
                   0x000014          0x4 LONG 0x294 DEFINED (__INT0Interrupt)?ABSOLUTE (__INT0Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000016          0x4 LONG 0x294 DEFINED (__Interrupt1)?ABSOLUTE (__Interrupt1):ABSOLUTE (__DefaultInterrupt)
                   0x000018          0x4 LONG 0x294 DEFINED (__CCP1Interrupt)?ABSOLUTE (__CCP1Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00001a          0x4 LONG 0x6c4 DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00001a          0x4 LONG 0x6a8 DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00001c          0x4 LONG 0x294 DEFINED (__Interrupt4)?ABSOLUTE (__Interrupt4):ABSOLUTE (__DefaultInterrupt)
                   0x00001e          0x4 LONG 0x294 DEFINED (__Interrupt5)?ABSOLUTE (__Interrupt5):ABSOLUTE (__DefaultInterrupt)
                   0x000020          0x4 LONG 0x294 DEFINED (__CCP2Interrupt)?ABSOLUTE (__CCP2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000022          0x4 LONG 0x790 DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000022          0x4 LONG 0x774 DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000024          0x4 LONG 0x294 DEFINED (__T3Interrupt)?ABSOLUTE (__T3Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000026          0x4 LONG 0x294 DEFINED (__Interrupt9)?ABSOLUTE (__Interrupt9):ABSOLUTE (__DefaultInterrupt)
                   0x000028          0x4 LONG 0x294 DEFINED (__Interrupt10)?ABSOLUTE (__Interrupt10):ABSOLUTE (__DefaultInterrupt)
@@ -651,9 +651,9 @@ __FICD
                   0x000044          0x4 LONG 0x294 DEFINED (__Interrupt24)?ABSOLUTE (__Interrupt24):ABSOLUTE (__DefaultInterrupt)
                   0x000046          0x4 LONG 0x294 DEFINED (__CCP3Interrupt)?ABSOLUTE (__CCP3Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000048          0x4 LONG 0x294 DEFINED (__Interrupt26)?ABSOLUTE (__Interrupt26):ABSOLUTE (__DefaultInterrupt)
-                  0x00004a          0x4 LONG 0xb44 DEFINED (__T4Interrupt)?ABSOLUTE (__T4Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00004a          0x4 LONG 0xb28 DEFINED (__T4Interrupt)?ABSOLUTE (__T4Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00004c          0x4 LONG 0x294 DEFINED (__Interrupt28)?ABSOLUTE (__Interrupt28):ABSOLUTE (__DefaultInterrupt)
-                  0x00004e          0x4 LONG 0x151e DEFINED (__INT2Interrupt)?ABSOLUTE (__INT2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00004e          0x4 LONG 0x171c DEFINED (__INT2Interrupt)?ABSOLUTE (__INT2Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000050          0x4 LONG 0x294 DEFINED (__U2RXInterrupt)?ABSOLUTE (__U2RXInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000052          0x4 LONG 0x294 DEFINED (__U2TXInterrupt)?ABSOLUTE (__U2TXInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000054          0x4 LONG 0x294 DEFINED (__Interrupt32)?ABSOLUTE (__Interrupt32):ABSOLUTE (__DefaultInterrupt)
@@ -755,11 +755,11 @@ __FICD
                   0x000114          0x4 LONG 0x294 DEFINED (__AltINT0Interrupt)?ABSOLUTE (__AltINT0Interrupt):DEFINED (__INT0Interrupt)?ABSOLUTE (__INT0Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000116          0x4 LONG 0x294 DEFINED (__AltInterrupt1)?ABSOLUTE (__AltInterrupt1):DEFINED (__Interrupt1)?ABSOLUTE (__Interrupt1):ABSOLUTE (__DefaultInterrupt)
                   0x000118          0x4 LONG 0x294 DEFINED (__AltCCP1Interrupt)?ABSOLUTE (__AltCCP1Interrupt):DEFINED (__CCP1Interrupt)?ABSOLUTE (__CCP1Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00011a          0x4 LONG 0x6c4 DEFINED (__AltT1Interrupt)?ABSOLUTE (__AltT1Interrupt):DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00011a          0x4 LONG 0x6a8 DEFINED (__AltT1Interrupt)?ABSOLUTE (__AltT1Interrupt):DEFINED (__T1Interrupt)?ABSOLUTE (__T1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00011c          0x4 LONG 0x294 DEFINED (__AltInterrupt4)?ABSOLUTE (__AltInterrupt4):DEFINED (__Interrupt4)?ABSOLUTE (__Interrupt4):ABSOLUTE (__DefaultInterrupt)
                   0x00011e          0x4 LONG 0x294 DEFINED (__AltInterrupt5)?ABSOLUTE (__AltInterrupt5):DEFINED (__Interrupt5)?ABSOLUTE (__Interrupt5):ABSOLUTE (__DefaultInterrupt)
                   0x000120          0x4 LONG 0x294 DEFINED (__AltCCP2Interrupt)?ABSOLUTE (__AltCCP2Interrupt):DEFINED (__CCP2Interrupt)?ABSOLUTE (__CCP2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000122          0x4 LONG 0x790 DEFINED (__AltT2Interrupt)?ABSOLUTE (__AltT2Interrupt):DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000122          0x4 LONG 0x774 DEFINED (__AltT2Interrupt)?ABSOLUTE (__AltT2Interrupt):DEFINED (__T2Interrupt)?ABSOLUTE (__T2Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000124          0x4 LONG 0x294 DEFINED (__AltT3Interrupt)?ABSOLUTE (__AltT3Interrupt):DEFINED (__T3Interrupt)?ABSOLUTE (__T3Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000126          0x4 LONG 0x294 DEFINED (__AltInterrupt9)?ABSOLUTE (__AltInterrupt9):DEFINED (__Interrupt9)?ABSOLUTE (__Interrupt9):ABSOLUTE (__DefaultInterrupt)
                   0x000128          0x4 LONG 0x294 DEFINED (__AltInterrupt10)?ABSOLUTE (__AltInterrupt10):DEFINED (__Interrupt10)?ABSOLUTE (__Interrupt10):ABSOLUTE (__DefaultInterrupt)
@@ -779,9 +779,9 @@ __FICD
                   0x000144          0x4 LONG 0x294 DEFINED (__AltInterrupt24)?ABSOLUTE (__AltInterrupt24):DEFINED (__Interrupt24)?ABSOLUTE (__Interrupt24):ABSOLUTE (__DefaultInterrupt)
                   0x000146          0x4 LONG 0x294 DEFINED (__AltCCP3Interrupt)?ABSOLUTE (__AltCCP3Interrupt):DEFINED (__CCP3Interrupt)?ABSOLUTE (__CCP3Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000148          0x4 LONG 0x294 DEFINED (__AltInterrupt26)?ABSOLUTE (__AltInterrupt26):DEFINED (__Interrupt26)?ABSOLUTE (__Interrupt26):ABSOLUTE (__DefaultInterrupt)
-                  0x00014a          0x4 LONG 0xb44 DEFINED (__AltT4Interrupt)?ABSOLUTE (__AltT4Interrupt):DEFINED (__T4Interrupt)?ABSOLUTE (__T4Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00014a          0x4 LONG 0xb28 DEFINED (__AltT4Interrupt)?ABSOLUTE (__AltT4Interrupt):DEFINED (__T4Interrupt)?ABSOLUTE (__T4Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00014c          0x4 LONG 0x294 DEFINED (__AltInterrupt28)?ABSOLUTE (__AltInterrupt28):DEFINED (__Interrupt28)?ABSOLUTE (__Interrupt28):ABSOLUTE (__DefaultInterrupt)
-                  0x00014e          0x4 LONG 0x151e DEFINED (__AltINT2Interrupt)?ABSOLUTE (__AltINT2Interrupt):DEFINED (__INT2Interrupt)?ABSOLUTE (__INT2Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00014e          0x4 LONG 0x171c DEFINED (__AltINT2Interrupt)?ABSOLUTE (__AltINT2Interrupt):DEFINED (__INT2Interrupt)?ABSOLUTE (__INT2Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000150          0x4 LONG 0x294 DEFINED (__AltU2RXInterrupt)?ABSOLUTE (__AltU2RXInterrupt):DEFINED (__U2RXInterrupt)?ABSOLUTE (__U2RXInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000152          0x4 LONG 0x294 DEFINED (__AltU2TXInterrupt)?ABSOLUTE (__AltU2TXInterrupt):DEFINED (__U2TXInterrupt)?ABSOLUTE (__U2TXInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000154          0x4 LONG 0x294 DEFINED (__AltInterrupt32)?ABSOLUTE (__AltInterrupt32):DEFINED (__Interrupt32)?ABSOLUTE (__Interrupt32):ABSOLUTE (__DefaultInterrupt)
@@ -1437,7 +1437,7 @@ __c30_signature
 .config_BSS       0xf80000          0x2
  .config_BSS      0xf80000          0x2 build/default/production/spaceteam_main.o
 
-.const              0x8298        0x154 load address 0x000298  
+.const              0x8298        0x138 load address 0x000298  
  .const             0x8298         0xe2 build/default/production/spaceteam_display.o
                     0x8298                  _req_randomize
                     0x82a2                  _req_set
@@ -1470,111 +1470,110 @@ __c30_signature
                     0x836e                  _req_for
                     0x8372                  _req_to
  .const             0x837a         0x3e build/default/production/spaceteam_game.o
- .const             0x83b8         0x1c build/default/production/spaceteam_wireless.o
- .const             0x83d4          0xc build/default/production/spaceteam_main.o
- .const             0x83e0          0xc build/default/production/spaceteam_io.o
-                    0x83e0                  _key_map
+ .const             0x83b8          0xc build/default/production/spaceteam_main.o
+ .const             0x83c4          0xc build/default/production/spaceteam_io.o
+                    0x83c4                  _key_map
 
-.text             0x0003ec       0x156a
- .text            0x0003ec        0x6da build/default/production/spaceteam_game.o
-                  0x0003ec                  _init_game_vars
-                  0x00043a                  _init_game
-                  0x000464                  _network_with_other_players
-                  0x0004a0                  _begin_game
-                  0x0004d8                  _lfsr_get_random
-                  0x000504                  _generate_request
-                  0x0005ae                  _register_request
-                  0x000640                  _deregister_request
-                  0x00069a                  _request_done
-                  0x0006a4                  _init_timer_1
-                  0x0006c4                  __T1Interrupt
-                  0x000732                  _init_timer_2
-                  0x000754                  _is_begin_debounced
-                  0x000790                  __T2Interrupt
-                  0x000838                  _check_request_completed
-                  0x000892                  _check_keypad_completed
-                  0x000958                  _check_switch_completed
-                  0x0009ca                  _check_knob_completed
-                  0x0009f8                  _multiplex_leds
-                  0x000a78                  _dec_game_health
-                  0x000a9c                  _register_player
-                  0x000ab0                  _get_active_players
-                  0x000aba                  _get_game_state
- .text            0x000ac6        0x5ec build/default/production/spaceteam_display.o
-                  0x000ac6                  _init_display
-                  0x000b24                  _init_timer_4
-                  0x000b44                  __T4Interrupt
-                  0x000bc6                  _display_line_buf
-                  0x000c6e                  _display_set_control_sigs
-                  0x000c88                  _display_write_command
-                  0x000ca6                  _display_write_char
-                  0x000cd0                  _hex_to_string
-                  0x000d38                  _display_write_hex
-                  0x000d4e                  _display_reset
-                  0x000d82                  _display_set_address
-                  0x000d98                  _display_write_line
-                  0x000dea                  _display_clear
-                  0x000dfa                  _dec_to_string
-                  0x000e5c                  _display_write_request
-                  0x000f20                  _display_set_buffer
-                  0x000f46                  _display_clear_line
-                  0x000f72                  _display_copy_string
-                  0x000fbc                  _display_scroll_set
-                  0x000fe2                  _display_key_buf
-                  0x00106c                  _display_rfid_token
- .text            0x0010b2        0x2fa build/default/production/spaceteam_rfid.o
-                  0x0010b2                  _init_rfid
-                  0x001116                  _rfid_write_reg
-                  0x00113c                  _rfid_read_reg
-                  0x001164                  _rfid_set_bits
-                  0x001180                  _rfid_clear_bits
-                  0x0011a0                  _rfid_transcieve
-                  0x0012ac                  _rfid_request_type
-                  0x0012e4                  _rfid_request_id
-                  0x00135e                  _rfid_get_token
- .text            0x0013ac        0x220 build/default/production/spaceteam_wireless.o
-                  0x0013ac                  _init_wireless
-                  0x001406                  _wl_module_set_address
-                  0x00141e                  _wl_module_get_status
-                  0x001434                  _wl_module_send_command
-                  0x001452                  _wl_module_read_register
-                  0x00146c                  _wl_module_read_register_byte
-                  0x001480                  _wl_module_write_register
-                  0x00149e                  _wl_module_write_register_byte
-                  0x0014b4                  _wl_module_get_payload
-                  0x0014c6                  _wl_module_send_payload
-                  0x0014f2                  _wl_module_send_ack
-                  0x00150e                  _wl_module_start_transmit
-                  0x00151e                  __INT2Interrupt
- .text            0x0015cc        0x21a build/default/production/spaceteam_io.o
-                  0x0015cc                  _init_io
-                  0x001600                  _is_io_initialized
-                  0x00160a                  _set_isel
-                  0x00162a                  _get_switch_val
-                  0x001642                  _set_lsel
-                  0x001660                  _get_iomux
-                  0x001676                  _init_keypad
-                  0x0016ac                  _scan_and_debounce_keypad
-                  0x001778                  _get_knob_sample
-                  0x001796                  _int_set_chip_selects
-                  0x0017b4                  _int_reset_chip_selects
- .text            0x0017e6         0xc6 build/default/production/spaceteam_spi.o
-                  0x0017e6                  _init_spi
-                  0x001802                  __spi_write
-                  0x001838                  _spi_write
-                  0x00184a                  _is_spi_initialized
-                  0x001858                  _spi_write_multiple
- .text            0x0018ac         0xaa build/default/production/spaceteam_msg.o
-                  0x0018ac                  _send_message
-                  0x0018f8                  _parse_message
+.text             0x0003d0       0x15a4
+ .text            0x0003d0        0x6da build/default/production/spaceteam_game.o
+                  0x0003d0                  _init_game_vars
+                  0x00041e                  _init_game
+                  0x000448                  _network_with_other_players
+                  0x000484                  _begin_game
+                  0x0004bc                  _lfsr_get_random
+                  0x0004e8                  _generate_request
+                  0x000592                  _register_request
+                  0x000624                  _deregister_request
+                  0x00067e                  _request_done
+                  0x000688                  _init_timer_1
+                  0x0006a8                  __T1Interrupt
+                  0x000716                  _init_timer_2
+                  0x000738                  _is_begin_debounced
+                  0x000774                  __T2Interrupt
+                  0x00081c                  _check_request_completed
+                  0x000876                  _check_keypad_completed
+                  0x00093c                  _check_switch_completed
+                  0x0009ae                  _check_knob_completed
+                  0x0009dc                  _multiplex_leds
+                  0x000a5c                  _dec_game_health
+                  0x000a80                  _register_player
+                  0x000a94                  _get_active_players
+                  0x000a9e                  _get_game_state
+ .text            0x000aaa        0x5ec build/default/production/spaceteam_display.o
+                  0x000aaa                  _init_display
+                  0x000b08                  _init_timer_4
+                  0x000b28                  __T4Interrupt
+                  0x000baa                  _display_line_buf
+                  0x000c52                  _display_set_control_sigs
+                  0x000c6c                  _display_write_command
+                  0x000c8a                  _display_write_char
+                  0x000cb4                  _hex_to_string
+                  0x000d1c                  _display_write_hex
+                  0x000d32                  _display_reset
+                  0x000d66                  _display_set_address
+                  0x000d7c                  _display_write_line
+                  0x000dce                  _display_clear
+                  0x000dde                  _dec_to_string
+                  0x000e40                  _display_write_request
+                  0x000f04                  _display_set_buffer
+                  0x000f2a                  _display_clear_line
+                  0x000f56                  _display_copy_string
+                  0x000fa0                  _display_scroll_set
+                  0x000fc6                  _display_key_buf
+                  0x001050                  _display_rfid_token
+ .text            0x001096        0x2fa build/default/production/spaceteam_rfid.o
+                  0x001096                  _init_rfid
+                  0x0010fa                  _rfid_write_reg
+                  0x001120                  _rfid_read_reg
+                  0x001148                  _rfid_set_bits
+                  0x001164                  _rfid_clear_bits
+                  0x001184                  _rfid_transcieve
+                  0x001290                  _rfid_request_type
+                  0x0012c8                  _rfid_request_id
+                  0x001342                  _rfid_get_token
+ .text            0x001390        0x21a build/default/production/spaceteam_io.o
+                  0x001390                  _init_io
+                  0x0013c4                  _is_io_initialized
+                  0x0013ce                  _set_isel
+                  0x0013ee                  _get_switch_val
+                  0x001406                  _set_lsel
+                  0x001424                  _get_iomux
+                  0x00143a                  _init_keypad
+                  0x001470                  _scan_and_debounce_keypad
+                  0x00153c                  _get_knob_sample
+                  0x00155a                  _int_set_chip_selects
+                  0x001578                  _int_reset_chip_selects
+ .text            0x0015aa        0x212 build/default/production/spaceteam_wireless.o
+                  0x0015aa                  _init_wireless
+                  0x001604                  _wl_module_set_address
+                  0x00161c                  _wl_module_get_status
+                  0x001632                  _wl_module_send_command
+                  0x001650                  _wl_module_read_register
+                  0x00166a                  _wl_module_read_register_byte
+                  0x00167e                  _wl_module_write_register
+                  0x00169c                  _wl_module_write_register_byte
+                  0x0016b2                  _wl_module_get_payload
+                  0x0016c4                  _wl_module_send_payload
+                  0x0016f0                  _wl_module_send_ack
+                  0x00170c                  _wl_module_start_transmit
+                  0x00171c                  __INT2Interrupt
+ .text            0x0017bc         0xf2 build/default/production/spaceteam_msg.o
+                  0x0017bc                  _send_message
+                  0x001808                  _parse_message
+ .text            0x0018ae         0xc6 build/default/production/spaceteam_spi.o
+                  0x0018ae                  _init_spi
+                  0x0018ca                  __spi_write
+                  0x001900                  _spi_write
+                  0x001912                  _is_spi_initialized
+                  0x001920                  _spi_write_multiple
 
-.dinit            0x001956         0x7e
- .dinit           0x001956         0x7e data_init
+.dinit            0x001974         0x7e
+ .dinit           0x001974         0x7e data_init
 
-.text             0x0019d4         0x2e
- .text            0x0019d4         0x2e build/default/production/spaceteam_main.o
-                  0x0019d4                  _main
+.text             0x0019f2         0x2e
+ .text            0x0019f2         0x2e build/default/production/spaceteam_main.o
+                  0x0019f2                  _main
 
-.init.delay32     0x001a02         0x1c
- .init.delay32    0x001a02         0x1c /Applications/microchip/xc16/v1.21/bin/bin/../../lib/libpic30-elf.a(delay32.eo)
-                  0x001a02                  ___delay32
+.init.delay32     0x001a20         0x1c
+ .init.delay32    0x001a20         0x1c /Applications/microchip/xc16/v1.21/bin/bin/../../lib/libpic30-elf.a(delay32.eo)
+                  0x001a20                  ___delay32

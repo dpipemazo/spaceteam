@@ -278,15 +278,15 @@ void _ISR _INT2Interrupt(void)
 
 
     if (status & (1<<TX_DS)){ // IRQ: Package has been sent
-    	display_write_line(0, "PACKET SENT");
+    	// display_write_line(0, "PACKET SENT");
 	    wl_module_write_register_byte(STATUS, (1<<TX_DS)); //Clear Interrupt Bit
 	    // PTX=0;
     }
 
-	if (status & (1<<MAX_RT)){ // IRQ: Package has not been sent, send again
-		display_write_line(0, "PACKET NOT SENT");
+	if (status & (1<<MAX_RT)){ // IRQ: Package has not been sent, oh well.
+		// display_write_line(0, "PACKET NOT SENT");
 		wl_module_write_register_byte(STATUS, (1<<MAX_RT));	// Clear Interrupt Bit
-		wl_module_start_transmit();
+		// wl_module_start_transmit();
 	}
 
 	if (status & (1<<RX_DR)){
