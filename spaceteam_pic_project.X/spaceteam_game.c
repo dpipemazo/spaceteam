@@ -490,10 +490,13 @@ void _ISR _T2Interrupt(void)
 		// If the begin button is debounced
 		if(is_begin_debounced())
 		{
-			// // Send a message to everyone saying that the game should start
-			send_message(MSG_BEGIN, 0, THIS_PLAYER, MASTER_PLAYER, 0);
-			// Then start the game!
-			begin_game();
+			#if (THIS_PLAYER != MASTER_PLAYER)
+				// // Send a message to the wireless master if we are not the master
+				send_message(MSG_BEGIN, 0, THIS_PLAYER, MASTER_PLAYER, 0);
+			#else
+				// Then start the game!
+				begin_game();
+			#endif
 		}
 	}
 

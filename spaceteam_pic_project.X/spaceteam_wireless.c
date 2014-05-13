@@ -110,9 +110,11 @@ void init_wireless()
 	//
 	#if (THIS_PLAYER == MASTER_PLAYER)
 		// Setup retries
-		wl_module_write_register_byte(SETUP_RETR, (SETUP_RETR_ARD_2000 | SETUP_RETR_ARC_3));
+		wl_module_write_register_byte(SETUP_RETR, (SETUP_RETR_ARD_1000 | SETUP_RETR_ARC_0));
 
 	#else
+		// Setup retries
+		wl_module_write_register_byte(SETUP_RETR, (SETUP_RETR_ARD_1000 | SETUP_RETR_ARC_0));
 		// Set length of incoming payload
     	wl_module_write_register_byte(RX_PW_P0, wl_module_PAYLOAD_LEN);
 		// Want to start up the receiver
@@ -239,7 +241,7 @@ void wl_module_send_payload(unsigned char * pload, spaceteam_player_t player)
     wl_module_set_address(player_addresses[player]);
 
     // Flush the TX FIFO
-    // wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
+    wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
 
     // SEnd the command to write the payload
     wl_module_send_command(W_TX_PAYLOAD, pload, NULL, wl_module_PAYLOAD_LEN);
@@ -253,7 +255,7 @@ void wl_module_send_payload(unsigned char * pload, spaceteam_player_t player)
 void wl_module_send_ack(unsigned char * pload)
 {
 	// Flush the TX FIFO
-    // wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
+    wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
 	// SEnd the command to write the payload
     wl_module_send_command(W_ACK_PAYLOAD, pload, NULL, wl_module_PAYLOAD_LEN);
 }

@@ -64,13 +64,8 @@
 
 int main(void) {
     
-    unsigned char rfid_data[RFID_ID_LEN];
-    rfid_status_t status;
     unsigned char * players;
-    unsigned char player_idx;
-    game_state_t game_state;
-    char master_payload[wl_module_PAYLOAD_LEN] = "Iron Man!";
-    char slave_payload[wl_module_PAYLOAD_LEN] = "Justin Hammer!";
+    int i;
 
 
     // Want to initialize the game
@@ -79,8 +74,25 @@ int main(void) {
     // Enter the waiting state for other players
     network_with_other_players();
 
+    // If we're the master player, we need to send out the begin messages to all other players
+    #if (THIS_PLAYER == MASTER_PLAYER)
+        players = get_active_players();
+        for (i = 1; i < NUM_PLAYERS; i++)
+        {
+            if (players[i] == PLAYER_PLAYING)
+            {
+                display_write_line(1, "sending begin to 1");
+                send_message(MSG_BEGIN, 0, THIS_PLAYER, i, 0);
+                __delay_ms(100);
+            }
+        }
+    #endif
+
+
+
+
     // Made it to while loop!
-    display_write_line(1, "game begun!");
+    // display_write_line(1, "game begun!");
 
     // Just loop for now
     while(1){};

@@ -55,18 +55,20 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 	unsigned char * players;
 	int i = 0;
 
-	#if (THIS_PLAYER == MASTER_PLAYER)
-		char forward_msg = 0;
-	#endif
+	// #if (THIS_PLAYER == MASTER_PLAYER)
+	// 	char forward_msg = 0;
+	// #endif
 
 	// // We first need to see if we should simply be forwarding this message along, as 
 	// //	can happen if we are the wireless master
-	// if (recipient != THIS_PLAYER)
-	// {
-	// 	send_message(msg, req, sender, recipient, val);
-	// }
-	// // Otherwise, the message is meant for us
-	// else
+	// #if (THIS_PLAYER == MASTER_PLAYER)
+	// 	if (recipient != THIS_PLAYER)
+	// 	{
+	// 		send_message(msg, req, sender, recipient, val);
+	// 	}
+	// 	// Otherwise, the message is meant for us
+	// 	else
+	// #endif
 	{
 		// Parse the message based on message type
 		switch(msg)
@@ -97,9 +99,6 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 			// If it's a networking request, then register the player
 			case MSG_NETWORKING:
 				register_player(sender);
-				#if (THIS_PLAYER == MASTER_PLAYER)
-					forward_msg = 1;
-				#endif
 				break;
 			// We need to begin the game!
 			case MSG_BEGIN:
@@ -111,21 +110,21 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 
 		// If we need to forward the message out to all of the other boards, 
 		//	the figure out which players are present and send the message to them
-		#if (THIS_PLAYER == MASTER_PLAYER)
-			if (forward_msg)
-			{
-				// Figure out the players
-				players = get_active_players();
-				// Send message to all of them who are not the sender
-				for (i = 0; i < NUM_PLAYERS; i++)
-				{
-					if ( (i != MASTER_PLAYER) && (i != sender) && (players[i] == PLAYER_PLAYING) )
-					{
-						send_message(msg, req, sender, i, val);
-					}
-				}
-			}
-		#endif
+		// #if (THIS_PLAYER == MASTER_PLAYER)
+		// 	if (forward_msg)
+		// 	{
+		// 		// Figure out the players
+		// 		players = get_active_players();
+		// 		// Send message to all of them who are not the sender
+		// 		for (i = 0; i < NUM_PLAYERS; i++)
+		// 		{
+		// 			if ( (i != MASTER_PLAYER) && (i != sender) && (players[i] == PLAYER_PLAYING) )
+		// 			{
+		// 				send_message(msg, req, sender, i, val);
+		// 			}
+		// 		}
+		// 	}
+		// #endif
 	}
 
 }
