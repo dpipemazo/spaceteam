@@ -90,6 +90,9 @@ void init_wireless()
 	wl_module_write_register_byte(FEATURE, 0x06);
 	// Initialize the dynamic payload length register to enable dynamic payloads on pipe 0
 	wl_module_write_register_byte(DYNPD, 0x01);
+	// Flush the TX and RX FIFOs on startup
+	wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
+	wl_module_send_command(FLUSH_RX, NULL, NULL, 0);
 
 	// Clear the shared variable for monitoring retries
 	PTX = 0;
@@ -250,7 +253,7 @@ void wl_module_send_payload(unsigned char * pload, spaceteam_player_t player)
 void wl_module_send_ack(unsigned char * pload)
 {
 	// Flush the TX FIFO
-    wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
+    // wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
 	// SEnd the command to write the payload
     wl_module_send_command(W_ACK_PAYLOAD, pload, NULL, wl_module_PAYLOAD_LEN);
 }
@@ -270,8 +273,8 @@ void _ISR _INT2Interrupt(void)
 	unsigned char rfid_cs_val;
 
 	// Pull the RFID chip select high
-	rfid_cs_val = RFID_CS;
-	RFID_CS = 1;
+	// rfid_cs_val = RFID_CS;
+	// RFID_CS = 1;
 
     // Read wl_module status
     status = wl_module_get_status();
@@ -296,7 +299,7 @@ void _ISR _INT2Interrupt(void)
 	}
 
 	// Reset the RFID CS to what it was previously
-	RFID_CS = rfid_cs_val;
+	// RFID_CS = rfid_cs_val;
 
     // reset INT2 flag
     IFS1bits.INT2IF = 0;

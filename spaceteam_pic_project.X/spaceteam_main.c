@@ -80,7 +80,7 @@ int main(void) {
     network_with_other_players();
 
     // Made it to while loop!
-    display_write_line(1, "game over!");
+    display_write_line(1, "game begun!");
 
     // Just loop for now
     while(1){};

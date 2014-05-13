@@ -28,7 +28,7 @@ typedef enum _spaceteam_player_t
 } spaceteam_player_t;
 
 #define MASTER_PLAYER 0
-#define THIS_PLAYER	0
+#define THIS_PLAYER	1
 #define NUM_PLAYERS 5
 
 #define FAILURE 1
