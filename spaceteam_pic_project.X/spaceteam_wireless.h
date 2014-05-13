@@ -36,10 +36,11 @@
 #include "spi.h"
 #include "nrf24l01.h"
 #include "spaceteam_general.h"
+#include "spaceteam_msg.h"
 
 // WL-Module settings
 #define wl_module_CH			2
-#define wl_module_PAYLOAD_LEN	16
+#define wl_module_PAYLOAD_LEN	(sizeof(spaceteam_packet_t))
 #define wl_module_RF_DR_HIGH	0		//0 = 1Mbps, 1 = 2Mpbs
 #define wl_module_RF_SETUP		(RF_SETUP_RF_PWR_0 | RF_SETUP_RF_DR_250)
 #define wl_module_CONFIG		( (1<<EN_CRC) | (1<<CRCO) )

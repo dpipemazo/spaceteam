@@ -12,8 +12,7 @@
 #define FCY 8000000UL
 #include <libpic30.h> 
 
-// This is a buffer that stores the message to be sent next time
-//	that we get a packet. ONLY USED IF NOT WIRELESS MASTER
+// memory used for sending a packet
 spaceteam_packet_t packet_buf;
 
 // This function sends a spaceteam message packet to another board.
@@ -57,14 +56,14 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 	int forward_msg = 0;
 	int i = 0;
 
-	// We first need to see if we should simply be forwarding this message along, as 
-	//	can happen if we are the wireless master
-	if (recipient != THIS_PLAYER)
-	{
-		send_message(msg, req, sender, recipient, val);
-	}
-	// Otherwise, the message is meant for us
-	else
+	// // We first need to see if we should simply be forwarding this message along, as 
+	// //	can happen if we are the wireless master
+	// if (recipient != THIS_PLAYER)
+	// {
+	// 	send_message(msg, req, sender, recipient, val);
+	// }
+	// // Otherwise, the message is meant for us
+	// else
 	{
 		// Parse the message based on message type
 		switch(msg)
@@ -91,29 +90,14 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 			//	master then we need to forward this to all boards
 			case MSG_HEALTH:
 				dec_game_health();
-				#if (THIS_PLAYER == MASTER_PLAYER)
-				{
-					forward_msg = 1;
-				}
-				#endif
 				break;
 			// If it's a networking request, then register the player
 			case MSG_NETWORKING:
 				register_player(sender);
-				#if (THIS_PLAYER == MASTER_PLAYER)
-				{
-					forward_msg = 1;
-				}
-				#endif
 				break;
 			// We need to begin the game!
 			case MSG_BEGIN:
 				begin_game();
-				#if (THIS_PLAYER == MASTER_PLAYER)
-				{
-					forward_msg = 1;
-				}
-				#endif
 				break;
 			default:
 				break;
@@ -121,20 +105,19 @@ void parse_message(spaceteam_msg_t msg, spaceteam_req_t req, unsigned char sende
 
 		// If we need to forward the message out to all of the other boards, 
 		//	the figure out which players are present and send the message to them
-		if (forward_msg)
-		{
-			// Figure out the players
-			players = get_active_players();
-			// Send message to all of them who are not the sender
-			while(players[i] != NUM_PLAYERS)
-			{
-				if ( (players[i] != MASTER_PLAYER) && (players[i] != sender) )
-				{
-					send_message(msg, req, sender, players[i], val);
-				}
-				i++;
-			}
-		}
+		// if (forward_msg)
+		// {
+		// 	// Figure out the players
+		// 	players = get_active_players();
+		// 	// Send message to all of them who are not the sender
+		// 	for (i = 0; i < NUM_PLAYERS; i++)
+		// 	{
+		// 		if ( (i != MASTER_PLAYER) && (i != sender) && (players[i] == PLAYER_PLAYING) )
+		// 		{
+		// 			send_message(msg, req, sender, i, val);
+		// 		}
+		// 	}
+		// }
 	}
 
 }

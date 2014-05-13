@@ -79,88 +79,13 @@ int main(void) {
     // Enter the waiting state for other players
     network_with_other_players();
 
+    // Made it to while loop!
+    display_write_line(1, "game over!");
 
+    // Just loop for now
+    while(1){};
 
-    // init_display();
-    // init_wireless();
-
-    // #if (THIS_PLAYER == MASTER_PLAYER)
-    //     wl_module_send_payload(master_payload, PLAYER_1);
-    // #else
-    //     wl_module_send_ack(slave_payload);
-    // #endif
-
-
-
-    while(1)
-    {
-        __delay_ms(100);
-        // //
-        // // The only thing that we do in the mainloop is scan for 
-        // //  RFID tokens, if needed.
-        // //
-        // if (scan_for_rfid())
-        // {
-        //     status = rfid_get_token(rfid_data);
-        //     // Get the current token, if there is one
-        //     if (status == RFID_SUCCESS)
-        //     {
-        //         // If we got a token, send it to the game module
-        //         //  for processing
-        //         set_game_rfid(rfid_data);
-        //     }
-        //     // If an error occurred, then just reset the module
-        //     else if (status == RFID_ERROR)
-        //     {
-        //         init_rfid();
-        //     }
-
-        // }
-
-        // // If we are a wireless master, we need to also send polling messages
-        // //  to everyone else in the game
-        // #if (BOARDNUM == MASTER_BOARDNUM)
-        // {
-        //     // If we are in the waiting state, then we need ot poll all players
-        //     game_state = get_game_state();
-
-        //     if (game_state == GAME_WAITING)
-        //     {
-        //         // Send messages to all possible players, except ourselves
-        //         for (player_idx = 1; player_idx < MAX_NUM_PLAYERS; player_idx++)
-        //         {
-        //            send_message(MSG_NETWORKING, 0, MASTER_BOARDNUM, player_idx, 0); 
-        //         }
-        //     }
-
-        //     // Otherwise, just send messages to the players who we know exist
-        //     else
-        //     {
-        //         // Get the active players list and send a polling message to all
-        //         //  of them
-        //         players = get_active_players();
-
-        //         player_idx = 0;
-
-        //         // Loop through the active players
-        //         while(players[player_idx] != MAX_NUM_PLAYERS)
-        //         {
-        //             // Make sure it's not the master
-        //             if (players[player_idx != MASTER_BOARDNUM])
-        //             {
-        //                 // Send a polling message
-        //                 send_message(MSG_POLL, 0, MASTER_BOARDNUM, players[player_idx], 0);
-        //             }
-        //         }
-        //     }
-
-        // }
-        // // Otherwise, just wait for a bit
-        // #else
-        //     __delay_ms(1000);
-        // #endif
-
-    };
+    display_write_line(1, "game over!");
 
     return 0;
 }

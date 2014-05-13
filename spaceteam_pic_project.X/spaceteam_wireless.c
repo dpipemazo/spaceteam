@@ -43,7 +43,7 @@
 
 // Flag which denotes transmitting mode
 volatile unsigned char PTX;
-unsigned char pload_data[wl_module_PAYLOAD_LEN];
+spaceteam_packet_t pload_data;
 
 // Addresses for all of the players
 unsigned char player_addresses[NUM_PLAYERS][wl_module_ADDR_LEN] =
@@ -107,7 +107,7 @@ void init_wireless()
 	//
 	#if (THIS_PLAYER == MASTER_PLAYER)
 		// Setup retries
-		wl_module_write_register_byte(SETUP_RETR, (SETUP_RETR_ARD_4000 | SETUP_RETR_ARC_15));
+		wl_module_write_register_byte(SETUP_RETR, (SETUP_RETR_ARD_2000 | SETUP_RETR_ARC_3));
 
 	#else
 		// Set length of incoming payload
@@ -225,18 +225,18 @@ void wl_module_send_payload(unsigned char * pload, spaceteam_player_t player)
 // Sends a data package to the default address. Be sure to send the correct
 // amount of bytes as configured as payload on the receiver.
 {
-    while (PTX) {}                  	// Wait until last packet is sent
+    // while (PTX) {}                  	// Wait until last packet is sent
 
     wl_module_CE_lo;					// Send the chip enable low
 
-    PTX = 1;                        	// Indicate that we are trying to send a packet
+    // PTX = 1;                        	// Indicate that we are trying to send a packet
     TX_POWERUP;                     	// Power up
 
     // Change the address
     wl_module_set_address(player_addresses[player]);
 
     // Flush the TX FIFO
-    wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
+    // wl_module_send_command(FLUSH_TX, NULL, NULL, 0);
 
     // SEnd the command to write the payload
     wl_module_send_command(W_TX_PAYLOAD, pload, NULL, wl_module_PAYLOAD_LEN);
@@ -280,7 +280,7 @@ void _ISR _INT2Interrupt(void)
     if (status & (1<<TX_DS)){ // IRQ: Package has been sent
     	display_write_line(0, "PACKET SENT");
 	    wl_module_write_register_byte(STATUS, (1<<TX_DS)); //Clear Interrupt Bit
-	    PTX=0;
+	    // PTX=0;
     }
 
 	if (status & (1<<MAX_RT)){ // IRQ: Package has not been sent, send again
@@ -290,9 +290,9 @@ void _ISR _INT2Interrupt(void)
 	}
 
 	if (status & (1<<RX_DR)){
-		wl_module_get_payload(pload_data); // And get the data
-		parse_message(pload_data); // Parse the message
+		wl_module_get_payload((unsigned char *)&pload_data); // And get the data
 		wl_module_write_register_byte(STATUS, (1<<RX_DR)); //Clear Interrupt Bit
+		parse_message(pload_data.type, pload_data.request, pload_data.sender, pload_data.recipient, pload_data.val); // Parse the message
 	}
 
 	// Reset the RFID CS to what it was previously

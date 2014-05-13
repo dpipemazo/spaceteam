@@ -76,6 +76,9 @@ typedef struct _spaceteam_request
 // LSEL value for the begin button
 #define BEGIN_ISEL_VAL			8
 
+#define PLAYER_PLAYING 1
+#define PLAYER_ABSENT 0
+
 // Different states that the game can be in
 typedef enum _game_state_t
 {
@@ -113,5 +116,6 @@ int dec_game_health(void);
 void register_player(unsigned char player);
 unsigned char * get_active_players(void);
 unsigned char get_game_state(void);
+void network_with_other_players(void);
 
 #endif /* SPACETEAM_GAME_H_ */

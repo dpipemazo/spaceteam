@@ -10,6 +10,12 @@
 #include "spaceteam_general.h"
 #include "spaceteam_wireless.h"
 
+//
+// Define the clock frequency
+//
+#define FCY 8000000UL
+#include <libpic30.h> 
+
 // Random number generator value
 unsigned lfsr;
 // Number of players in the game
@@ -50,7 +56,7 @@ unsigned char isel_vals[NO_REQ] =
 		1 	  // Reed = S7
 	};
 
-unsigned char active_players[MAX_NUM_PLAYERS];
+unsigned char active_players[NUM_PLAYERS];
 
 // Initialize the game-related variables
 void init_game_vars(void)
@@ -58,24 +64,26 @@ void init_game_vars(void)
 	int i;
 
 	// Just set the game state to waiting
-	game_state = GAME_INIT;
+	game_state = GAME_WAITING;
 
 	// Loop through the active requests array and initialize them all to NO_REQ
 	//	Also set the active players array to invalid numbers
 	for (i = 0; i < NUM_PLAYERS; i++)
 	{
 		active_requests[i].type = NO_REQ;
-		active_players[i] = NUM_PLAYERS;
+		active_players[i] = PLAYER_ABSENT;
 	}
 
 	// Need to register ourself in the active players list though
-	active_players[0] = THIS_PLAYER;
+	active_players[THIS_PLAYER] = PLAYER_PLAYING;
 
 	// Clear out the keypress buffer
 	for (i = 0; i < MAX_KEYPRESSES; i++)
 	{
 		key_buf[i] = 0;
 	}
+
+	curr_LED = 0;
 
 }
 
@@ -113,33 +121,37 @@ void init_game(void)
 void network_with_other_players()
 {
 	int i;
+	char network_sent = 0;
+	char * players;
 
-	while (has_game_begun() == false)
+	while( game_state != GAME_STARTED)
 	{
 
 		// There are two cases for this function, one if we are the master, one if we are not
 		#if (THIS_PLAYER == MASTER_PLAYER)
 
 			// If we are the master, we need to send our networking message to all other players
-			for (i = 1; i < NUM_PLAYERS; i++)
+			for (i = 0; i < NUM_PLAYERS; i++)
 			{
-				// Send a networking message to the player, if they exist
-				send_message(MSG_NETWORKING, 0, THIS_PLAYER, i, 0);
-				__delay_ms(100);
+				if (i != MASTER_PLAYER)
+				{
+					// Send a networking message to the player, if they exist
+					send_message(MSG_NETWORKING, 0, MASTER_PLAYER, i, 0);
+					__delay_ms(100);
+				}
 			}
 
 		// If we are not the master player, we only want to send the ack once, 
 		#else
-			if (game_state == GAME_INIT)
+			if (network_sent == 0)
 			{
 				send_message(MSG_NETWORKING, 0, THIS_PLAYER, MASTER_PLAYER, 0);
 			}
-			__delay_ms(100);
+
+			network_sent = 1;
 		#endif
 
 	}
-
-	return (game_state == GAME_BEGIN)
 
 }
 
@@ -153,7 +165,7 @@ void begin_game(void)
 	// Figure out how many players we have, by counting how
 	//	many valid entries we have in the active players array
 	num_players = 0;
-	while(active_players[num_players] != MAX_NUM_PLAYERS)
+	while(active_players[num_players] != NUM_PLAYERS)
 	{
 		num_players++;
 	}
@@ -197,7 +209,7 @@ void generate_request(void)
 	// Generate the random board number, request type and request value 
 	//	for the request
 	rand_val = lfsr_get_random();
-	player_idx = rand_val % MAX_NUM_PLAYERS;
+	player_idx = rand_val % NUM_PLAYERS;
 	// my_req.board = active_players[player_idx];
 	my_req.board = THIS_PLAYER;
 
@@ -248,7 +260,7 @@ void register_request(spaceteam_req_t type, unsigned char board, unsigned val)
 
 	// Copy the request into our active requests array at the 
 	//	first available index
-	for (i = 0; i < MAX_NUM_PLAYERS; i++)
+	for (i = 0; i < NUM_PLAYERS; i++)
 	{
 		if(active_requests[i].type == NO_REQ)
 		{
@@ -288,7 +300,7 @@ void deregister_request(spaceteam_req_t type, unsigned char board, unsigned val)
 
 	// Look through our array of active requests, and 
 	//	take out this one since we no longer need it
-	for (i = 0; i < MAX_NUM_PLAYERS; i++)
+	for (i = 0; i < NUM_PLAYERS; i++)
 	{
 		// Match on all categories for good measure
 		if ( (active_requests[i].board == board) && (active_requests[i].type == type) && (active_requests[i].val == val) )
@@ -451,7 +463,7 @@ void _ISR _T2Interrupt(void)
 		//
 		// Check all of our active requests
 		//
-		for (i = 0; i < MAX_NUM_PLAYERS; i++)
+		for (i = 0; i < NUM_PLAYERS; i++)
 		{
 			// See if there is a request pending in the slot
 			if(active_requests[i].type != NO_REQ)
@@ -470,9 +482,6 @@ void _ISR _T2Interrupt(void)
 				}
 			}
 		}
-
-		// Multiplex the LEDs
-		multiplex_leds();
 	}
 	// Otherwise, we need to look for the begin button being pressed to 
 	//	transition from the end of the game to something more usefun
@@ -482,11 +491,14 @@ void _ISR _T2Interrupt(void)
 		if(is_begin_debounced())
 		{
 			// // Send a message to everyone saying that the game should start
-			// send_message(MSG_BEGIN, 0, THIS_PLAYER, MASTER_THIS_PLAYER, 0);
+			send_message(MSG_BEGIN, 0, THIS_PLAYER, MASTER_PLAYER, 0);
 			// Then start the game!
 			begin_game();
 		}
 	}
+
+	// Always multiplex the LEDs
+	multiplex_leds();
 
 	// Need to clear the interrupt Flag
 	TIMER_2_INT_FLAG = 0;
@@ -663,14 +675,14 @@ void multiplex_leds(void)
 	else if (game_state == GAME_WAITING)
 	{
 		// If we have the current player as an active player
-		if (active_players[curr_LED] != MAX_NUM_PLAYERS)
+		if (active_players[curr_LED] == PLAYER_PLAYING)
 		{
 			// Then turn the LED on. 
 			set_lsel(curr_LED);
 		}
 
 		// Mod the LED counter by the maximum number of players
-		curr_LED = (curr_LED + 1) % MAX_NUM_PLAYERS;
+		curr_LED = (curr_LED + 1) % NUM_PLAYERS;
 	}
 
 }
@@ -684,7 +696,7 @@ int dec_game_health(void)
 	game_health -= 1;
 
 	// Send a decrement game health message to everyone	
-	// send_message(MSG_HEALTH, 0, THIS_PLAYER, MASTER_THIS_PLAYER, 0);
+	// send_message(MSG_HEALTH, 0, THIS_PLAYER, MASTER_PLAYER, 0);
 
 	// If the game is over, then re-initialize everything
 	if (game_health == 0)
@@ -699,25 +711,7 @@ int dec_game_health(void)
 // This function registers a player in the game
 void register_player(unsigned char player)
 {
-	int i = 0;
-	int seen_before = 0;
-
-	// Loop over the active players' array until we find a spot to put the 
-	//	player in
-	while(active_players[i] != MAX_NUM_PLAYERS)
-	{
-		i++;
-		if (active_players[i] == player)
-		{
-			seen_before = 1;
-		}
-	}
-
-	if (!seen_before)
-	{
-		// Now, put the player in
-		active_players[i] = player;
-	}
+	active_players[player] = PLAYER_PLAYING;
 }
 
 // This function returns a pointer to the array of active players
