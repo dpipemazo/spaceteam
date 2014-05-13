@@ -123,6 +123,7 @@ void network_with_other_players()
 	int i;
 	char network_sent = 0;
 	char * players;
+	unsigned count = 0;
 
 	while( game_state != GAME_STARTED)
 	{
@@ -137,7 +138,11 @@ void network_with_other_players()
 				{
 					// Send a networking message to the player, if they exist
 					send_message(MSG_NETWORKING, 0, MASTER_PLAYER, i, 0);
-					__delay_ms(100);
+					count = 0;
+					while(count < 5000)
+					{
+						count++;
+					}
 				}
 			}
 
